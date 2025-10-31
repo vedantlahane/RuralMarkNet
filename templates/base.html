@@ -1,0 +1,22 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{% get_current_language %}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{% trans "RuralMarkNet" %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+    {% include "includes/navbar.html" %}
+    <main class="container mx-auto px-4 py-8">
+        {% include "includes/messages.html" %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="bg-slate-800 text-white py-6 mt-16">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>&copy; {% now "Y" %} RuralMarkNet</p>
+        </div>
+    </footer>
+</body>
+</html>
