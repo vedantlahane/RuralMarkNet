@@ -4,33 +4,49 @@
 {% block title %}{% trans "Your cart" %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% trans "Shopping cart" %}</h1>
-{% if items %}
-    <table class="w-full bg-white rounded shadow text-left text-sm">
-        <thead class="bg-slate-100">
-            <tr>
-                <th class="px-4 py-2">{% trans "Product" %}</th>
-                <th class="px-4 py-2">{% trans "Quantity" %}</th>
-                <th class="px-4 py-2">{% trans "Price" %}</th>
-                <th class="px-4 py-2">{% trans "Total" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-                <tr class="border-b">
-                    <td class="px-4 py-2">{{ item.product.name }}</td>
-                    <td class="px-4 py-2">{{ item.quantity }}</td>
-                    <td class="px-4 py-2">₹ {{ item.price }}</td>
-                    <td class="px-4 py-2">₹ {{ item.line_total }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="mt-4 flex justify-between items-center">
-        <p class="text-lg font-semibold">{% trans "Grand total" %}: ₹ {{ cart.total_amount }}</p>
-        <a href="{% url 'orders:checkout' %}" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Proceed to checkout" %}</a>
+<section class="space-y-8">
+    <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Shopping cart" %}</p>
+                <h1 class="text-3xl font-semibold text-slate-900">{% trans "Review your items" %}</h1>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600">
+                {% blocktrans count count=items|length %}
+                    {{ count }} item
+                {% plural %}
+                    {{ count }} items
+                {% endblocktrans %}
+            </span>
+        </div>
     </div>
-{% else %}
-    <p class="text-slate-600">{% trans "Your cart is currently empty." %}</p>
-{% endif %}
+
+    {% if items %}
+        <div class="space-y-4">
+            {% for item in items %}
+                <article class="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50 md:flex-row md:items-center md:justify-between">
+                    <div class="space-y-1">
+                        <p class="text-lg font-semibold text-slate-900">{{ item.product.name }}</p>
+                        <p class="text-sm text-slate-500">{% blocktrans with quantity=item.quantity %}Quantity: {{ quantity }}{% endblocktrans %}</p>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm font-semibold text-slate-700">
+                        <span class="rounded-full bg-slate-100 px-3 py-1 text-slate-600">₹ {{ item.price }}</span>
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-emerald-600">₹ {{ item.line_total }}</span>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+        <div class="flex flex-col gap-4 rounded-3xl bg-emerald-50 p-6 text-slate-800 md:flex-row md:items-center md:justify-between">
+            <p class="text-lg font-semibold">{% trans "Grand total" %}: ₹ {{ cart.total_amount }}</p>
+            <a href="{% url 'orders:checkout' %}" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Proceed to checkout" %}</a>
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-white p-12 text-center text-slate-500">
+            <p class="text-4xl">🛒</p>
+            <h2 class="mt-4 text-2xl font-semibold text-slate-700">{% trans "Your cart is currently empty" %}</h2>
+            <p class="mt-2 text-sm">{% trans "Browse the marketplace to add fresh produce to your cart." %}</p>
+            <a href="{% url 'products:list' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500">{% trans "Explore products" %}</a>
+        </div>
+    {% endif %}
+</section>
 {% endblock %}

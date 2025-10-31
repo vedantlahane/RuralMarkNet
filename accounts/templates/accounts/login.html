@@ -4,24 +4,57 @@
 {% block title %}{% trans "Sign in" %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-6">{% trans "Welcome back" %}</h1>
-<form method="post" class="space-y-4 max-w-md bg-white shadow p-6 rounded">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div>
-        <label for="id_username" class="block text-sm font-medium text-slate-700">{% trans "Username" %}</label>
-        {{ form.username }}
-        {{ form.username.errors }}
+<div class="mx-auto max-w-lg">
+    <div class="rounded-3xl bg-white p-8 shadow-lg ring-1 ring-emerald-50">
+        <div class="mb-8 space-y-2 text-center">
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Welcome back" %}</p>
+            <h1 class="text-3xl font-semibold text-slate-900">{% trans "Sign in to continue" %}</h1>
+            <p class="text-sm text-slate-500">{% trans "Access your dashboard, orders, and delivery schedule." %}</p>
+        </div>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            {% with input_classes="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" %}
+                <div>
+                    <label for="id_username" class="block text-sm font-semibold text-slate-700">{% trans "Username" %}</label>
+                    {{ form.username.as_widget(attrs={'class': input_classes, 'placeholder': form.username.label, 'autocomplete': 'username'}) }}
+                    {% if form.username.errors %}
+                        <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                            {% for error in form.username.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="id_password" class="block text-sm font-semibold text-slate-700">{% trans "Password" %}</label>
+                    {{ form.password.as_widget(attrs={'class': input_classes, 'placeholder': form.password.label, 'autocomplete': 'current-password'}) }}
+                    {% if form.password.errors %}
+                        <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                            {% for error in form.password.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endwith %}
+            <div class="flex items-center justify-between">
+                <label for="id_remember_me" class="flex items-center gap-2 text-sm text-slate-700">
+                    {{ form.remember_me.as_widget(attrs={'class': 'h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500'}) }}
+                    <span>{{ form.remember_me.label }}</span>
+                </label>
+                <span class="text-xs text-slate-400">{% trans "Need help signing in?" %}</span>
+            </div>
+            <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Login" %}</button>
+        </form>
+        <p class="mt-8 text-center text-sm text-slate-500">
+            {% trans "New to RuralMarkNet?" %}
+            <a href="{% url 'accounts:signup' %}" class="font-medium text-emerald-600 hover:text-emerald-500">{% trans "Create an account" %}</a>
+        </p>
     </div>
-    <div>
-        <label for="id_password" class="block text-sm font-medium text-slate-700">{% trans "Password" %}</label>
-        {{ form.password }}
-        {{ form.password.errors }}
-    </div>
-    <div class="flex items-center gap-2">
-        {{ form.remember_me }}
-        <label for="id_remember_me" class="text-sm text-slate-700">{% trans "Remember me" %}</label>
-    </div>
-    <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Login" %}</button>
-</form>
+</div>
 {% endblock %}

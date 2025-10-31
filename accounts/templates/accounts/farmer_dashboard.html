@@ -3,8 +3,27 @@
 
 {% block content %}
 {{ block.super }}
-<div class="mt-6 bg-white p-4 rounded shadow">
-    <h2 class="text-lg font-semibold mb-2">{% trans "Logistics Overview" %}</h2>
-    <p class="text-sm text-slate-600">{% trans "Manage your delivery commitments and inventory from here." %}</p>
-</div>
+<section class="mt-10 grid gap-6 md:grid-cols-2">
+    <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+        <h2 class="text-xl font-semibold text-slate-900">{% trans "Logistics Overview" %}</h2>
+        <p class="mt-2 text-sm text-slate-500">{% trans "Stay ahead by monitoring inventory levels and pending deliveries." %}</p>
+        <div class="mt-4 grid gap-3 text-sm text-slate-600">
+            <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <span>{% trans "Pending deliveries" %}</span>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">{{ pending_deliveries|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <span>{% trans "Low stock products" %}</span>
+                <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600">{{ low_stock_count|default:0 }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="rounded-3xl bg-emerald-50 p-6">
+        <h3 class="text-lg font-semibold text-emerald-900">{% trans "Grow your reach" %}</h3>
+        <p class="mt-3 text-sm text-emerald-800">
+            {% trans "Regularly refresh listings and confirm delivery slots so customers enjoy reliable service." %}
+        </p>
+        <a href="{% url 'products:create' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500">{% trans "Add new product" %}</a>
+    </div>
+</section>
 {% endblock %}

@@ -4,34 +4,91 @@
 {% block title %}{% trans "Dashboard" %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% trans "Dashboard" %}</h1>
-<p class="text-slate-600">{% blocktrans %}Hello {{ user.first_name|default:user.username }}, here is a snapshot of your recent activity.{% endblocktrans %}</p>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-    <section class="bg-white p-4 rounded shadow">
-        <h2 class="text-lg font-semibold mb-2">{% trans "Recent Orders" %}</h2>
-        <ul class="space-y-2">
-            {% for order in orders %}
-                <li class="flex justify-between text-sm">
-                    <span>{{ order }}</span>
-                    <span class="text-slate-500">{{ order.get_status_display }}</span>
-                </li>
-            {% empty %}
-                <li class="text-sm text-slate-500">{% trans "No orders yet." %}</li>
-            {% endfor %}
-        </ul>
-    </section>
-    <section class="bg-white p-4 rounded shadow">
-        <h2 class="text-lg font-semibold mb-2">{% trans "Recent Products" %}</h2>
-        <ul class="space-y-2">
-            {% for product in products %}
-                <li class="flex justify-between text-sm">
-                    <span>{{ product.name }}</span>
-                    <span class="text-slate-500">{{ product.price }} ₹</span>
-                </li>
-            {% empty %}
-                <li class="text-sm text-slate-500">{% trans "No products yet." %}</li>
-            {% endfor %}
-        </ul>
-    </section>
-</div>
+<section class="grid gap-10">
+    <div class="rounded-3xl bg-linear-to-r from-emerald-500 via-emerald-600 to-emerald-500 px-6 py-8 text-white shadow-xl">
+        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-4">
+                <p class="text-sm uppercase tracking-wide text-white/80">{% trans "Welcome to RuralMarkNet" %}</p>
+                <h1 class="text-3xl font-semibold md:text-4xl">
+                    {% blocktrans %}Hello {{ user.first_name|default:user.username }}{% endblocktrans %}
+                </h1>
+                <p class="max-w-2xl text-white/90">{% trans "Track marketplace activity, deliveries, and recent actions in one place." %}</p>
+            </div>
+            <div class="grid w-full max-w-xs grid-cols-1 gap-4 text-sm">
+                <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                    <p class="text-white/80">{% trans "Recent orders" %}</p>
+                    <span class="text-2xl font-semibold">{{ orders|length }}</span>
+                </div>
+                <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                    <p class="text-white/80">{% trans "Active products" %}</p>
+                    <span class="text-2xl font-semibold">{{ products|length }}</span>
+                </div>
+                <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                    <p class="text-white/80">{% trans "Last sign in" %}</p>
+                    <span class="text-right text-base font-semibold">
+                        {% if user.last_login %}
+                            {{ user.last_login|date:"SHORT_DATE_FORMAT" }}
+                        {% else %}
+                            {% trans "First login" %}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <header class="flex items-center justify-between pb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-900">{% trans "Recent Orders" %}</h2>
+                    <p class="text-sm text-slate-500">{% trans "Latest activity from your marketplace." %}</p>
+                </div>
+                <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">🛒</span>
+            </header>
+            <ul class="divide-y divide-slate-100">
+                {% for order in orders %}
+                    <li class="flex items-center justify-between py-4 text-sm text-slate-700">
+                        <div class="flex flex-col">
+                            <span class="font-medium">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</span>
+                            <span class="text-xs text-slate-500">{{ order.created_at|date:"SHORT_DATE_FORMAT" }}</span>
+                        </div>
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{{ order.get_status_display }}</span>
+                    </li>
+                {% empty %}
+                    <li class="py-8 text-center text-sm text-slate-500">{% trans "No orders yet. Share your listings to get started." %}</li>
+                {% endfor %}
+            </ul>
+            <div class="mt-4 flex justify-end">
+                <a href="{% url 'orders:list' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">{% trans "View all orders" %}</a>
+            </div>
+        </section>
+
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <header class="flex items-center justify-between pb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-900">{% trans "Recent Products" %}</h2>
+                    <p class="text-sm text-slate-500">{% trans "Fresh items ready for your customers." %}</p>
+                </div>
+                <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">🌾</span>
+            </header>
+            <ul class="divide-y divide-slate-100">
+                {% for product in products %}
+                    <li class="flex items-center justify-between py-4 text-sm text-slate-700">
+                        <div>
+                            <p class="font-medium">{{ product.name }}</p>
+                            <p class="text-xs text-slate-500">{{ product.get_category_display }} · {{ product.location }}</p>
+                        </div>
+                        <p class="font-semibold text-emerald-600">₹ {{ product.price }}</p>
+                    </li>
+                {% empty %}
+                    <li class="py-8 text-center text-sm text-slate-500">{% trans "No products yet. Add your first listing to reach customers." %}</li>
+                {% endfor %}
+            </ul>
+            <div class="mt-4 flex justify-end">
+                <a href="{% url 'products:list' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">{% trans "Browse marketplace" %}</a>
+            </div>
+        </section>
+    </div>
+</section>
 {% endblock %}

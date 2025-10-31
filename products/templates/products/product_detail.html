@@ -4,21 +4,58 @@
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white rounded shadow p-4">
+<section class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+    <article class="overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-emerald-50">
         {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="rounded mb-4">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-72 w-full object-cover">
+        {% else %}
+            <div class="flex h-72 w-full items-center justify-center bg-emerald-50 text-6xl">🌾</div>
         {% endif %}
-        <h1 class="text-3xl font-semibold">{{ product.name }}</h1>
-        <p class="text-slate-500">{{ product.get_category_display }} · {{ product.location }}</p>
-        <p class="text-2xl font-semibold text-emerald-700 mt-4">₹ {{ product.price }}</p>
-        <p class="mt-4 text-slate-700">{{ product.description|linebreaks }}</p>
-        <p class="mt-4 text-sm text-slate-500">{% trans "Farmer" %}: {{ product.farmer.get_full_name|default:product.farmer.username }}</p>
-    </div>
-    <div class="bg-white rounded shadow p-4">
-        <h2 class="text-lg font-semibold mb-2">{% trans "Order this product" %}</h2>
-        <p class="text-sm text-slate-600 mb-4">{% trans "Add items to your cart and choose delivery during checkout." %}</p>
-        <a href="{% url 'orders:add-to-cart' product.pk %}" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Add to cart" %}</a>
-    </div>
-</div>
+        <div class="space-y-6 p-8">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-semibold text-slate-900">{{ product.name }}</h1>
+                    <p class="text-sm text-slate-500">{{ product.get_category_display }} · {{ product.location|default:_('Location TBD') }}</p>
+                </div>
+                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600">
+                    ₹ {{ product.price }}
+                </span>
+            </div>
+            <div class="grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Availability" %}</p>
+                    {% if product.available %}
+                        <p class="mt-2 font-semibold text-emerald-600">{% trans "In stock" %}</p>
+                    {% else %}
+                        <p class="mt-2 font-semibold text-rose-600">{% trans "Currently unavailable" %}</p>
+                    {% endif %}
+                </div>
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Inventory" %}</p>
+                    <p class="mt-2 font-semibold text-slate-700">{{ product.inventory }}</p>
+                </div>
+            </div>
+            <div class="prose prose-sm max-w-none text-slate-700">
+                {{ product.description|linebreaks }}
+            </div>
+            <p class="text-sm text-slate-500">
+                {% trans "Farmer" %}:
+                {{ product.farmer.get_full_name|default:product.farmer.username }}
+            </p>
+        </div>
+    </article>
+    <aside class="flex flex-col gap-6">
+        <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+            <h2 class="text-xl font-semibold text-slate-900">{% trans "Order this product" %}</h2>
+            <p class="mt-2 text-sm text-slate-600">{% trans "Add items to your cart and choose delivery during checkout." %}</p>
+            <a href="{% url 'orders:add-to-cart' product.pk %}" class="mt-5 inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">
+                {% trans "Add to cart" %}
+            </a>
+        </div>
+        <div class="rounded-3xl bg-emerald-50 p-6 text-sm text-emerald-900">
+            <h3 class="text-lg font-semibold">{% trans "Need larger quantities?" %}</h3>
+            <p class="mt-2">{% trans "Chat with the farmer via your dashboard to coordinate bulk orders or recurring deliveries." %}</p>
+        </div>
+    </aside>
+</section>
 {% endblock %}

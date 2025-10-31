@@ -4,33 +4,69 @@
 {% block title %}{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</h1>
-<div class="bg-white shadow rounded p-4">
-    <p class="text-sm text-slate-600">{% trans "Status" %}: {{ order.get_status_display }}</p>
-    <p class="text-sm text-slate-600">{% trans "Payment" %}: {{ order.get_payment_status_display }}</p>
-    <p class="text-sm text-slate-600">{% trans "Delivery" %}: {{ order.scheduled_date }} · {{ order.scheduled_window }}</p>
-    <p class="text-sm text-slate-600">{% trans "Address" %}: {{ order.delivery_address }}</p>
-</div>
-<h2 class="text-lg font-semibold mt-6 mb-2">{% trans "Items" %}</h2>
-<table class="w-full bg-white rounded shadow text-left text-sm">
-    <thead class="bg-slate-100">
-        <tr>
-            <th class="px-4 py-2">{% trans "Product" %}</th>
-            <th class="px-4 py-2">{% trans "Quantity" %}</th>
-            <th class="px-4 py-2">{% trans "Price" %}</th>
-            <th class="px-4 py-2">{% trans "Total" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in order.items.all %}
-            <tr class="border-b">
-                <td class="px-4 py-2">{{ item.product.name }}</td>
-                <td class="px-4 py-2">{{ item.quantity }}</td>
-                <td class="px-4 py-2">₹ {{ item.price }}</td>
-                <td class="px-4 py-2">₹ {{ item.line_total }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<p class="text-right text-lg font-semibold mt-4">{% trans "Total" %}: ₹ {{ order.total_amount }}</p>
+<section class="space-y-8">
+    <header class="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Order" %}</p>
+            <h1 class="text-3xl font-semibold text-slate-900">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</h1>
+        </div>
+        <span class="inline-flex items-center justify-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600">{{ order.get_status_display }}</span>
+    </header>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+            <h2 class="text-lg font-semibold text-slate-900">{% trans "Order summary" %}</h2>
+            <dl class="mt-4 space-y-3 text-sm text-slate-600">
+                <div class="flex items-center justify-between">
+                    <dt class="text-slate-500">{% trans "Payment" %}</dt>
+                    <dd class="font-medium">{{ order.get_payment_status_display }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-slate-500">{% trans "Scheduled date" %}</dt>
+                    <dd class="font-medium">{{ order.scheduled_date|default:_('TBD') }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-slate-500">{% trans "Delivery window" %}</dt>
+                    <dd class="font-medium">{{ order.scheduled_window|default:_('To be confirmed') }}</dd>
+                </div>
+            </dl>
+        </div>
+        <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+            <h2 class="text-lg font-semibold text-slate-900">{% trans "Delivery address" %}</h2>
+            <p class="mt-3 whitespace-pre-line text-sm text-slate-600">{{ order.delivery_address|default:_('No address provided') }}</p>
+        </div>
+    </div>
+
+    <section class="space-y-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+        <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-900">{% trans "Items" %}</h2>
+            <span class="text-sm text-slate-500">
+                {% blocktrans count item_count=order.items.count %}
+                    {{ item_count }} item in this order
+                {% plural %}
+                    {{ item_count }} items in this order
+                {% endblocktrans %}
+            </span>
+        </header>
+        <div class="space-y-4">
+            {% for item in order.items.all %}
+                <article class="flex flex-col gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="font-semibold text-slate-900">{{ item.product.name }}</p>
+                        <p class="text-xs text-slate-500">{% blocktrans with quantity=item.quantity %}Quantity: {{ quantity }}{% endblocktrans %}</p>
+                    </div>
+                    <div class="flex items-center gap-4 font-semibold">
+                        <span class="text-slate-500">₹ {{ item.price }}</span>
+                        <span class="text-emerald-600">₹ {{ item.line_total }}</span>
+                    </div>
+                </article>
+            {% empty %}
+                <p class="rounded-2xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">{% trans "No items recorded for this order." %}</p>
+            {% endfor %}
+        </div>
+        <div class="flex items-center justify-end border-t border-slate-200 pt-4 text-lg font-semibold text-slate-900">
+            <span>{% trans "Total" %}: ₹ {{ order.total_amount }}</span>
+        </div>
+    </section>
+</section>
 {% endblock %}

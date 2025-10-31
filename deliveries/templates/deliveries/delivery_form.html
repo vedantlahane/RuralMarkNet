@@ -4,16 +4,40 @@
 {% block title %}{% trans "Update delivery" %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% trans "Update delivery status" %}</h1>
-<form method="post" class="space-y-4 max-w-lg bg-white shadow p-6 rounded">
-    {% csrf_token %}
-    {% for field in form %}
-        <div>
-            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
-            {{ field }}
-            {{ field.errors }}
+<div class="mx-auto max-w-xl">
+    <div class="rounded-3xl bg-white p-8 shadow-lg ring-1 ring-emerald-50">
+        <div class="mb-8 space-y-2">
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Delivery" %}</p>
+            <h1 class="text-3xl font-semibold text-slate-900">{% trans "Update delivery status" %}</h1>
+            <p class="text-sm text-slate-500">{% trans "Share real-time information so customers remain informed." %}</p>
         </div>
-    {% endfor %}
-    <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Save" %}</button>
-</form>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            {% with input_classes="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" %}
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700">{{ field.label }}</label>
+                        {{ field.as_widget(attrs={'class': input_classes}) }}
+                        {% if field.errors %}
+                            <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+            <div class="flex items-center justify-end gap-3">
+                <a href="{% url 'deliveries:list' %}" class="text-sm font-medium text-slate-500 hover:text-slate-700">{% trans "Cancel" %}</a>
+                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Save" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

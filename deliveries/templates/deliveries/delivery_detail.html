@@ -4,14 +4,41 @@
 {% block title %}{% blocktrans %}Delivery for order #{{ delivery.order.pk }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% blocktrans %}Delivery for order #{{ delivery.order.pk }}{% endblocktrans %}</h1>
-<div class="bg-white rounded shadow p-4 space-y-2">
-    <p class="text-sm text-slate-600">{% trans "Status" %}: {{ delivery.get_status_display }}</p>
-    <p class="text-sm text-slate-600">{% trans "Driver" %}: {{ delivery.driver_name|default:_('TBD') }}</p>
-    <p class="text-sm text-slate-600">{% trans "Contact" %}: {{ delivery.contact_number|default:_('TBD') }}</p>
-    <p class="text-sm text-slate-600">{% trans "Last update" %}: {{ delivery.updated_at|date:"SHORT_DATETIME_FORMAT" }}</p>
-</div>
-{% if user.is_farmer and delivery.assigned_farmer_id == user.id %}
-    <a href="{% url 'deliveries:update' delivery.pk %}" class="inline-block mt-4 bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Update delivery" %}</a>
-{% endif %}
+<section class="space-y-8">
+    <header class="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Delivery" %}</p>
+            <h1 class="text-3xl font-semibold text-slate-900">{% blocktrans %}Delivery for order #{{ delivery.order.pk }}{% endblocktrans %}</h1>
+        </div>
+        <span class="inline-flex items-center justify-center rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600">{{ delivery.get_status_display }}</span>
+    </header>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <article class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+            <h2 class="text-lg font-semibold text-slate-900">{% trans "Logistics" %}</h2>
+            <dl class="mt-4 space-y-3 text-sm text-slate-600">
+                <div class="flex items-center justify-between">
+                    <dt class="text-slate-500">{% trans "Driver" %}</dt>
+                    <dd class="font-medium">{{ delivery.driver_name|default:_('TBD') }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-slate-500">{% trans "Contact" %}</dt>
+                    <dd class="font-medium">{{ delivery.contact_number|default:_('TBD') }}</dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt class="text-slate-500">{% trans "Last update" %}</dt>
+                    <dd class="font-medium">{{ delivery.updated_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
+                </div>
+            </dl>
+        </article>
+        <article class="rounded-3xl bg-emerald-50 p-6 text-sm text-emerald-900">
+            <h2 class="text-lg font-semibold">{% trans "Next steps" %}</h2>
+            <p class="mt-2">{% trans "Keep customers informed by updating the status as soon as the delivery progresses." %}</p>
+        </article>
+    </div>
+
+    {% if user.is_farmer and delivery.assigned_farmer_id == user.id %}
+        <a href="{% url 'deliveries:update' delivery.pk %}" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500 md:w-auto">{% trans "Update delivery" %}</a>
+    {% endif %}
+</section>
 {% endblock %}

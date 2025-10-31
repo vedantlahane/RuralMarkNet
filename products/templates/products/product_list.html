@@ -4,38 +4,89 @@
 {% block title %}{% trans "Products" %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% trans "Available Produce" %}</h1>
-<form method="get" class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-white p-4 rounded shadow mb-6">
-    <input type="text" name="search" value="{{ request.GET.search }}" placeholder="{% trans "Search" %}" class="border rounded px-3 py-2 md:col-span-2">
-    <select name="category" class="border rounded px-3 py-2">
-        <option value="">{% trans "All categories" %}</option>
-        {% for value, label in product_categories %}
-            <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-    </select>
-    <input type="number" name="min_price" step="0.01" value="{{ request.GET.min_price }}" placeholder="{% trans "Min price" %}" class="border rounded px-3 py-2">
-    <input type="number" name="max_price" step="0.01" value="{{ request.GET.max_price }}" placeholder="{% trans "Max price" %}" class="border rounded px-3 py-2">
-    <label class="flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" name="available" value="true" {% if request.GET.available %}checked{% endif %}>
-        {% trans "In stock" %}
-    </label>
-    <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Filter" %}</button>
-</form>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {% for product in products %}
-        <article class="bg-white shadow rounded overflow-hidden">
-            {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-48 w-full object-cover">
-            {% endif %}
-            <div class="p-4">
-                <h2 class="text-lg font-semibold"><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>
-                <p class="text-sm text-slate-500">{{ product.get_category_display }} · {{ product.location }}</p>
-                <p class="text-xl font-semibold text-emerald-700 mt-2">₹ {{ product.price }}</p>
-                <a href="{{ product.get_absolute_url }}" class="text-sm text-emerald-600 mt-3 inline-block">{% trans "View details" %}</a>
+<section class="space-y-10">
+    <div class="overflow-hidden rounded-3xl bg-linear-to-r from-emerald-500 via-emerald-600 to-emerald-500 p-8 text-white shadow-xl">
+        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-4">
+                <p class="text-sm font-semibold uppercase tracking-wide text-white/80">{% trans "Marketplace" %}</p>
+                <h1 class="text-3xl font-semibold md:text-4xl">{% trans "Available Produce" %}</h1>
+                <p class="max-w-2xl text-white/90">{% trans "Discover fresh produce from local farmers and fine-tune your search with filters below." %}</p>
             </div>
-        </article>
-    {% empty %}
-        <p class="col-span-full text-slate-600">{% trans "No products match your filters yet." %}</p>
-    {% endfor %}
-</div>
+            <div class="grid w-full max-w-xs grid-cols-2 gap-4 text-sm md:grid-cols-1">
+                <div class="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                    <p class="text-xs uppercase tracking-wide text-white/70">{% trans "Listings" %}</p>
+                    <p class="mt-2 text-2xl font-semibold">{{ products|length }}</p>
+                </div>
+                <div class="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                    <p class="text-xs uppercase tracking-wide text-white/70">{% trans "Categories" %}</p>
+                    <p class="mt-2 text-2xl font-semibold">{{ product_categories|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="get" class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
+            <input type="text" name="search" value="{{ request.GET.search|default_if_none:'' }}" placeholder="{% trans "Search produce" %}" class="col-span-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 md:col-span-2">
+            <select name="category" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+                <option value="">{% trans "All categories" %}</option>
+                {% for value, label in product_categories %}
+                    <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="min_price" step="0.01" value="{{ request.GET.min_price|default_if_none:'' }}" placeholder="{% trans "Min price" %}" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+            <input type="number" name="max_price" step="0.01" value="{{ request.GET.max_price|default_if_none:'' }}" placeholder="{% trans "Max price" %}" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+            <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 shadow-sm focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200">
+                <span>{% trans "In stock" %}</span>
+                <input type="checkbox" name="available" value="true" class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if request.GET.available %}checked{% endif %}>
+            </label>
+        </div>
+        <div class="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <button type="submit" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Apply filters" %}</button>
+            <a href="{% url 'products:list' %}" class="text-sm font-medium text-slate-500 hover:text-slate-700">{% trans "Reset" %}</a>
+        </div>
+    </form>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for product in products %}
+            <article class="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-emerald-50 transition hover:-translate-y-1 hover:shadow-xl">
+                <div class="relative h-48 w-full overflow-hidden bg-emerald-100">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                    {% else %}
+                        <div class="flex h-full w-full items-center justify-center text-4xl">🌿</div>
+                    {% endif %}
+                    <span class="absolute left-4 top-4 inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        {{ product.get_category_display }}
+                    </span>
+                </div>
+                <div class="flex flex-1 flex-col gap-4 p-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-slate-900">
+                            <a href="{{ product.get_absolute_url }}" class="hover:text-emerald-600">{{ product.name }}</a>
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500">{{ product.location }}</p>
+                    </div>
+                    <p class="text-2xl font-semibold text-emerald-600">₹ {{ product.price }}</p>
+                    <div class="mt-auto flex items-center justify-between text-sm text-slate-500">
+                        <p>{% blocktrans with inventory=product.inventory %}Inventory: {{ inventory }}{% endblocktrans %}</p>
+                        {% if product.available %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">● {% trans "Available" %}</span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">● {% trans "Out of stock" %}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ product.get_absolute_url }}" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500">{% trans "View details" %}</a>
+                </div>
+            </article>
+        {% empty %}
+            <div class="col-span-full flex flex-col items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-white p-12 text-center text-slate-500">
+                <p class="text-4xl">🌱</p>
+                <h2 class="mt-4 text-2xl font-semibold text-slate-700">{% trans "No products match your filters yet" %}</h2>
+                <p class="mt-2 text-sm">{% trans "Try adjusting your search keywords or explore other categories." %}</p>
+                <a href="{% url 'products:list' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500">{% trans "Browse all products" %}</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}

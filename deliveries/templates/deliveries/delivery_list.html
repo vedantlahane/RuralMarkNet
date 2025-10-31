@@ -4,31 +4,34 @@
 {% block title %}{% trans "Deliveries" %}{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-semibold mb-4">{% trans "Delivery schedules" %}</h1>
-<table class="w-full bg-white rounded shadow text-left text-sm">
-    <thead class="bg-slate-100">
-        <tr>
-            <th class="px-4 py-2">{% trans "Order" %}</th>
-            <th class="px-4 py-2">{% trans "Status" %}</th>
-            <th class="px-4 py-2">{% trans "Updated" %}</th>
-            <th class="px-4 py-2"></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for delivery in deliveries %}
-            <tr class="border-b">
-                <td class="px-4 py-2">#{{ delivery.order.pk }}</td>
-                <td class="px-4 py-2">{{ delivery.get_status_display }}</td>
-                <td class="px-4 py-2">{{ delivery.updated_at|date:"SHORT_DATE_FORMAT" }}</td>
-                <td class="px-4 py-2 text-right">
-                    <a href="{% url 'deliveries:detail' delivery.pk %}" class="text-emerald-600">{% trans "View" %}</a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="4" class="px-4 py-4 text-center text-slate-500">{% trans "No deliveries yet." %}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<section class="space-y-8">
+    <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Delivery schedules" %}</p>
+        <h1 class="text-3xl font-semibold text-slate-900">{% trans "Track logistics" %}</h1>
+        <p class="mt-2 text-sm text-slate-500">{% trans "Follow delivery progress and quickly update last-mile details." %}</p>
+    </div>
+
+    {% if deliveries %}
+        <div class="grid gap-6 md:grid-cols-2">
+            {% for delivery in deliveries %}
+                <article class="flex h-full flex-col gap-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-slate-900">{% blocktrans %}Order #{{ delivery.order.pk }}{% endblocktrans %}</h2>
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">{{ delivery.get_status_display }}</span>
+                    </div>
+                    <p class="text-sm text-slate-500">{% trans "Last updated" %}: {{ delivery.updated_at|date:"SHORT_DATE_FORMAT" }}</p>
+                    <div class="flex items-center justify-end">
+                        <a href="{% url 'deliveries:detail' delivery.pk %}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-500">{% trans "View details" %}</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-white p-12 text-center text-slate-500">
+            <p class="text-4xl">🚚</p>
+            <h2 class="mt-4 text-2xl font-semibold text-slate-700">{% trans "No deliveries yet" %}</h2>
+            <p class="mt-2 text-sm">{% trans "Orders will appear here once they are scheduled for delivery." %}</p>
+        </div>
+    {% endif %}
+</section>
 {% endblock %}

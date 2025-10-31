@@ -1,7 +1,68 @@
+{% load i18n %}
 {% if messages %}
-<ul class="mb-4 space-y-2">
+<ul class="mb-8 space-y-3" role="status">
     {% for message in messages %}
-        <li class="px-4 py-2 rounded bg-emerald-100 text-emerald-900">{{ message }}</li>
+        {% if "error" in message.tags %}
+            <li class="relative overflow-hidden rounded-3xl border border-rose-200 bg-rose-50 px-6 py-5 text-rose-900 shadow-sm" role="alert">
+                <div class="flex items-start gap-4">
+                    <span class="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-rose-500 shadow-sm">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.6c.75 1.336-.212 3.001-1.742 3.001H3.48c-1.53 0-2.492-1.665-1.742-3.001l6.519-11.6zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V7a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="sr-only">{% trans "Error" %}</span>
+                    </span>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-rose-500">{% trans "Something needs attention" %}</p>
+                        <p class="text-sm leading-relaxed">{{ message }}</p>
+                    </div>
+                </div>
+            </li>
+        {% elif "warning" in message.tags %}
+            <li class="relative overflow-hidden rounded-3xl border border-amber-200 bg-amber-50 px-6 py-5 text-amber-900 shadow-sm" role="alert">
+                <div class="flex items-start gap-4">
+                    <span class="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-amber-500 shadow-sm">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.6c.75 1.336-.212 3.001-1.742 3.001H3.48c-1.53 0-2.492-1.665-1.742-3.001l6.519-11.6zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V7a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="sr-only">{% trans "Warning" %}</span>
+                    </span>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-amber-600">{% trans "Please review" %}</p>
+                        <p class="text-sm leading-relaxed">{{ message }}</p>
+                    </div>
+                </div>
+            </li>
+        {% elif "success" in message.tags %}
+            <li class="relative overflow-hidden rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-5 text-emerald-900 shadow-sm" role="alert">
+                <div class="flex items-start gap-4">
+                    <span class="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-emerald-500 shadow-sm">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L8.5 11.086l6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="sr-only">{% trans "Success" %}</span>
+                    </span>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">{% trans "All set" %}</p>
+                        <p class="text-sm leading-relaxed">{{ message }}</p>
+                    </div>
+                </div>
+            </li>
+        {% else %}
+            <li class="relative overflow-hidden rounded-3xl border border-sky-200 bg-sky-50 px-6 py-5 text-sky-900 shadow-sm" role="alert">
+                <div class="flex items-start gap-4">
+                    <span class="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-sky-500 shadow-sm">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 10A8 8 0 112 10a8 8 0 0116 0zm-7-3a1 1 0 11-2 0 1 1 0 012 0zm-1 2a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="sr-only">{% trans "Information" %}</span>
+                    </span>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-sky-600">{% trans "Heads up" %}</p>
+                        <p class="text-sm leading-relaxed">{{ message }}</p>
+                    </div>
+                </div>
+            </li>
+        {% endif %}
     {% endfor %}
 </ul>
 {% endif %}
