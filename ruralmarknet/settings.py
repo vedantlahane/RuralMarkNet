@@ -36,13 +36,16 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "tailwind",
-    "tailwind_theme",
+    "theme",
     "accounts",
     "products",
     "orders",
     "deliveries",
     "payments",
 ]
+
+
+TAILWIND_APP_NAME = "theme"
 
 SITE_ID = 1
 
@@ -129,7 +132,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
-TAILWIND_APP_NAME = "tailwind_theme"
 INTERNAL_IPS = ["127.0.0.1"]
 
 LOGIN_REDIRECT_URL = "accounts:dashboard"
