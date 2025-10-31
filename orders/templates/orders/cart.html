@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Your cart" %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% trans "Shopping cart" %}</h1>
+{% if items %}
+    <table class="w-full bg-white rounded shadow text-left text-sm">
+        <thead class="bg-slate-100">
+            <tr>
+                <th class="px-4 py-2">{% trans "Product" %}</th>
+                <th class="px-4 py-2">{% trans "Quantity" %}</th>
+                <th class="px-4 py-2">{% trans "Price" %}</th>
+                <th class="px-4 py-2">{% trans "Total" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr class="border-b">
+                    <td class="px-4 py-2">{{ item.product.name }}</td>
+                    <td class="px-4 py-2">{{ item.quantity }}</td>
+                    <td class="px-4 py-2">₹ {{ item.price }}</td>
+                    <td class="px-4 py-2">₹ {{ item.line_total }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="mt-4 flex justify-between items-center">
+        <p class="text-lg font-semibold">{% trans "Grand total" %}: ₹ {{ cart.total_amount }}</p>
+        <a href="{% url 'orders:checkout' %}" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Proceed to checkout" %}</a>
+    </div>
+{% else %}
+    <p class="text-slate-600">{% trans "Your cart is currently empty." %}</p>
+{% endif %}
+{% endblock %}

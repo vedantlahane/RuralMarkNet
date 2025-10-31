@@ -13,7 +13,7 @@ from .forms import ProductFilterForm, ProductForm
 from .models import Product
 
 
-class ProductListView(ListView[Product]):
+class ProductListView(ListView):
     """Display available products with filtering options."""
 
     model = Product
@@ -47,7 +47,7 @@ class ProductListView(ListView[Product]):
         return queryset
 
 
-class ProductDetailView(DetailView[Product]):
+class ProductDetailView(DetailView):
     """Display a single product."""
 
     model = Product
@@ -67,7 +67,7 @@ class FarmerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         return super().handle_no_permission()
 
 
-class ProductCreateView(FarmerRequiredMixin, CreateView[Product]):
+class ProductCreateView(FarmerRequiredMixin, CreateView):
     """Allow farmers to add new products."""
 
     form_class = ProductForm
@@ -79,7 +79,7 @@ class ProductCreateView(FarmerRequiredMixin, CreateView[Product]):
         return super().form_valid(form)
 
 
-class ProductUpdateView(FarmerRequiredMixin, UpdateView[Product]):
+class ProductUpdateView(FarmerRequiredMixin, UpdateView):
     """Allow farmers to update an existing product."""
 
     form_class = ProductForm
@@ -94,7 +94,7 @@ class ProductUpdateView(FarmerRequiredMixin, UpdateView[Product]):
         return super().form_valid(form)
 
 
-class FarmerProductListView(FarmerRequiredMixin, ListView[Product]):
+class FarmerProductListView(FarmerRequiredMixin, ListView):
     """List of products owned by the logged-in farmer."""
 
     template_name = "products/farmer_product_list.html"

@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, TemplateView
 
@@ -16,12 +16,12 @@ from .forms import LoginForm, ProfileForm, UserRegistrationForm
 from .models import User
 
 
-class SignUpView(CreateView[User]):
+class SignUpView(CreateView):
     """Allow new customers and farmers to register."""
 
     template_name = "accounts/signup.html"
     form_class = UserRegistrationForm
-    success_url = reverse_lazy("dashboard")
+    success_url = reverse_lazy("accounts:dashboard")
 
     def form_valid(self, form: UserRegistrationForm) -> HttpResponse:
         response = super().form_valid(form)
@@ -71,7 +71,7 @@ def update_profile(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             form.save()
             messages.success(request, _("Profile updated successfully."))
-            return redirect("dashboard")
+            return redirect("accounts:dashboard")
     else:
         form = ProfileForm(instance=request.user)
     return render(request, "accounts/profile_form.html", {"form": form})
@@ -81,5 +81,5 @@ def redirect_to_role_dashboard(request: HttpRequest) -> HttpResponse:
     """Send the logged-in user to their role-specific dashboard."""
 
     if not request.user.is_authenticated:
-        return redirect("login")
+        return redirect("accounts:login")
     return redirect(request.user.get_dashboard_url())

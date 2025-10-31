@@ -49,7 +49,7 @@ class User(AbstractUser):
     def get_dashboard_url(self) -> str:
         """Return the named URL for the user dashboard."""
         if self.is_farmer:
-            return "farmer-dashboard"
+            return "accounts:farmer-dashboard"
         if self.is_customer:
-            return "customer-dashboard"
-        return "dashboard"
+            return "accounts:customer-dashboard"
+        return "accounts:dashboard"

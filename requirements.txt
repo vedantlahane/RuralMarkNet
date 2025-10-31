@@ -1,0 +1,7 @@
+Django>=5.0,<6.0
+Pillow>=10.0
+stripe>=11.0
+django-tailwind>=3.8
+paypalrestsdk>=1.13
+redis>=5.0
+celery>=5.4

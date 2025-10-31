@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktrans %}Delivery for order #{{ delivery.order.pk }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% blocktrans %}Delivery for order #{{ delivery.order.pk }}{% endblocktrans %}</h1>
+<div class="bg-white rounded shadow p-4 space-y-2">
+    <p class="text-sm text-slate-600">{% trans "Status" %}: {{ delivery.get_status_display }}</p>
+    <p class="text-sm text-slate-600">{% trans "Driver" %}: {{ delivery.driver_name|default:_('TBD') }}</p>
+    <p class="text-sm text-slate-600">{% trans "Contact" %}: {{ delivery.contact_number|default:_('TBD') }}</p>
+    <p class="text-sm text-slate-600">{% trans "Last update" %}: {{ delivery.updated_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+</div>
+{% if user.is_farmer and delivery.assigned_farmer_id == user.id %}
+    <a href="{% url 'deliveries:update' delivery.pk %}" class="inline-block mt-4 bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Update delivery" %}</a>
+{% endif %}
+{% endblock %}

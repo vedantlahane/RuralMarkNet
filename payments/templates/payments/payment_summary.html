@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Complete payment" %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% trans "Payment summary" %}</h1>
+<div class="bg-white rounded shadow p-4 space-y-2 mb-6">
+    <p class="text-sm text-slate-600">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</p>
+    <p class="text-sm text-slate-600">{% trans "Total" %}: ₹ {{ order.total_amount }}</p>
+</div>
+<form method="post" class="space-y-4 max-w-lg bg-white shadow p-6 rounded">
+    {% csrf_token %}
+    <div>
+        <label for="id_provider" class="block text-sm font-medium text-slate-700">{{ form.provider.label }}</label>
+        {{ form.provider }}
+    </div>
+    <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Continue to payment" %}</button>
+</form>
+{% endblock %}

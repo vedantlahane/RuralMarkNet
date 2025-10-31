@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</h1>
+<div class="bg-white shadow rounded p-4">
+    <p class="text-sm text-slate-600">{% trans "Status" %}: {{ order.get_status_display }}</p>
+    <p class="text-sm text-slate-600">{% trans "Payment" %}: {{ order.get_payment_status_display }}</p>
+    <p class="text-sm text-slate-600">{% trans "Delivery" %}: {{ order.scheduled_date }} · {{ order.scheduled_window }}</p>
+    <p class="text-sm text-slate-600">{% trans "Address" %}: {{ order.delivery_address }}</p>
+</div>
+<h2 class="text-lg font-semibold mt-6 mb-2">{% trans "Items" %}</h2>
+<table class="w-full bg-white rounded shadow text-left text-sm">
+    <thead class="bg-slate-100">
+        <tr>
+            <th class="px-4 py-2">{% trans "Product" %}</th>
+            <th class="px-4 py-2">{% trans "Quantity" %}</th>
+            <th class="px-4 py-2">{% trans "Price" %}</th>
+            <th class="px-4 py-2">{% trans "Total" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order.items.all %}
+            <tr class="border-b">
+                <td class="px-4 py-2">{{ item.product.name }}</td>
+                <td class="px-4 py-2">{{ item.quantity }}</td>
+                <td class="px-4 py-2">₹ {{ item.price }}</td>
+                <td class="px-4 py-2">₹ {{ item.line_total }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="text-right text-lg font-semibold mt-4">{% trans "Total" %}: ₹ {{ order.total_amount }}</p>
+{% endblock %}

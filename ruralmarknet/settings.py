@@ -21,7 +21,11 @@ def getenv(name: str, default: str | None = None) -> str:
 
 SECRET_KEY = getenv("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = getenv("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS: list[str] = getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS: list[str] = [
+    host.strip()
+    for host in getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -31,8 +35,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    "django_tailwind",
-    "theme",
+    "tailwind",
+    "tailwind_theme",
     "accounts",
     "products",
     "orders",
@@ -125,12 +129,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
-TAILWIND_APP_NAME = "theme"
+TAILWIND_APP_NAME = "tailwind_theme"
 INTERNAL_IPS = ["127.0.0.1"]
 
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "home"
-LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "accounts:dashboard"
+LOGOUT_REDIRECT_URL = "products:home"
+LOGIN_URL = "accounts:login"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -147,9 +151,13 @@ SESSION_ENGINE = getenv(
     "DJANGO_SESSION_ENGINE", "django.contrib.sessions.backends.cached_db"
 )
 
-CSRF_TRUSTED_ORIGINS = getenv(
-    "DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1"
-).split(",")
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in getenv(
+        "DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1"
+    ).split(",")
+    if origin.strip()
+]
 
 STRIPE_API_KEY = getenv("STRIPE_API_KEY", "")
 STRIPE_WEBHOOK_SECRET = getenv("STRIPE_WEBHOOK_SECRET", "")
