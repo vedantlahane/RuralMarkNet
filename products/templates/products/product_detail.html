@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded shadow p-4">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="rounded mb-4">
+        {% endif %}
+        <h1 class="text-3xl font-semibold">{{ product.name }}</h1>
+        <p class="text-slate-500">{{ product.get_category_display }} · {{ product.location }}</p>
+        <p class="text-2xl font-semibold text-emerald-700 mt-4">₹ {{ product.price }}</p>
+        <p class="mt-4 text-slate-700">{{ product.description|linebreaks }}</p>
+        <p class="mt-4 text-sm text-slate-500">{% trans "Farmer" %}: {{ product.farmer.get_full_name|default:product.farmer.username }}</p>
+    </div>
+    <div class="bg-white rounded shadow p-4">
+        <h2 class="text-lg font-semibold mb-2">{% trans "Order this product" %}</h2>
+        <p class="text-sm text-slate-600 mb-4">{% trans "Add items to your cart and choose delivery during checkout." %}</p>
+        <a href="{% url 'orders:add-to-cart' product.pk %}" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Add to cart" %}</a>
+    </div>
+</div>
+{% endblock %}
