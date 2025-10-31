@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% trans "Dashboard" %}</h1>
+<p class="text-slate-600">{% blocktrans %}Hello {{ user.first_name|default:user.username }}, here is a snapshot of your recent activity.{% endblocktrans %}</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <section class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">{% trans "Recent Orders" %}</h2>
+        <ul class="space-y-2">
+            {% for order in orders %}
+                <li class="flex justify-between text-sm">
+                    <span>{{ order }}</span>
+                    <span class="text-slate-500">{{ order.get_status_display }}</span>
+                </li>
+            {% empty %}
+                <li class="text-sm text-slate-500">{% trans "No orders yet." %}</li>
+            {% endfor %}
+        </ul>
+    </section>
+    <section class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">{% trans "Recent Products" %}</h2>
+        <ul class="space-y-2">
+            {% for product in products %}
+                <li class="flex justify-between text-sm">
+                    <span>{{ product.name }}</span>
+                    <span class="text-slate-500">{{ product.price }} ₹</span>
+                </li>
+            {% empty %}
+                <li class="text-sm text-slate-500">{% trans "No products yet." %}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+{% endblock %}

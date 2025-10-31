@@ -1,0 +1,10 @@
+{% extends "accounts/dashboard.html" %}
+{% load i18n %}
+
+{% block content %}
+{{ block.super }}
+<div class="mt-6 bg-white p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2">{% trans "Logistics Overview" %}</h2>
+    <p class="text-sm text-slate-600">{% trans "Manage your delivery commitments and inventory from here." %}</p>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign in" %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-6">{% trans "Welcome back" %}</h1>
+<form method="post" class="space-y-4 max-w-md bg-white shadow p-6 rounded">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        <label for="id_username" class="block text-sm font-medium text-slate-700">{% trans "Username" %}</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+    </div>
+    <div>
+        <label for="id_password" class="block text-sm font-medium text-slate-700">{% trans "Password" %}</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+    </div>
+    <div class="flex items-center gap-2">
+        {{ form.remember_me }}
+        <label for="id_remember_me" class="text-sm text-slate-700">{% trans "Remember me" %}</label>
+    </div>
+    <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Login" %}</button>
+</form>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "accounts/dashboard.html" %}
+{% load i18n %}
+
+{% block content %}
+{{ block.super }}
+<div class="mt-6 bg-white p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2">{% trans "Delivery Schedule" %}</h2>
+    <p class="text-sm text-slate-600">{% trans "Track your upcoming deliveries from this panel." %}</p>
+</div>
+{% endblock %}

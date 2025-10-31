@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Create an account" %}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold mb-6">{% trans "Create your RuralMarkNet account" %}</h1>
+<form method="post" class="space-y-4 max-w-xl bg-white shadow p-6 rounded">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <p class="text-xs text-slate-500">{{ field.help_text }}</p>
+            {% endif %}
+            {{ field.errors }}
+        </div>
+    {% endfor %}
+    <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">{% trans "Sign up" %}</button>
+</form>
+{% endblock %}
