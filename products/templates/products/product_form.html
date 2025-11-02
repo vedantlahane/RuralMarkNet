@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n form_extras %}
 
 {% block title %}{% trans "Manage product" %}{% endblock %}
 
@@ -27,14 +27,14 @@
                             <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700">{{ field.label }}</label>
                         {% endif %}
                         {% if field.field.widget.input_type == "file" %}
-                            {{ field.as_widget(attrs={'class': file_classes}) }}
+                            {% render_field field class=file_classes %}
                         {% elif field.field.widget.input_type == "checkbox" %}
                             <label class="flex items-center gap-2 text-sm text-slate-700">
-                                {{ field.as_widget(attrs={'class': 'h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500'}) }}
+                                {% render_field field class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" %}
                                 <span>{{ field.label }}</span>
                             </label>
                         {% else %}
-                            {{ field.as_widget(attrs={'class': input_classes, 'placeholder': field.label}) }}
+                            {% render_field field class=input_classes placeholder=field.label %}
                         {% endif %}
                         {% if field.help_text %}
                             <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>

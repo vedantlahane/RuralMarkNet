@@ -10,7 +10,9 @@
             <div class="space-y-4">
                 <p class="text-sm uppercase tracking-wide text-white/80">{% trans "Welcome to RuralMarkNet" %}</p>
                 <h1 class="text-3xl font-semibold md:text-4xl">
-                    {% blocktrans %}Hello {{ user.first_name|default:user.username }}{% endblocktrans %}
+                    {% with name=user.first_name|default:user.username role=user.get_role_display %}
+                        {% blocktrans %}Hello {{ name }} · {{ role }}{% endblocktrans %}
+                    {% endwith %}
                 </h1>
                 <p class="max-w-2xl text-white/90">{% trans "Track marketplace activity, deliveries, and recent actions in one place." %}</p>
                 {% if role_badge %}

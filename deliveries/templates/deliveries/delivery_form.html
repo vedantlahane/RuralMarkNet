@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n form_extras %}
 
 {% block title %}{% trans "Update delivery" %}{% endblock %}
 
@@ -22,7 +22,7 @@
                 {% for field in form %}
                     <div>
                         <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700">{{ field.label }}</label>
-                        {{ field.as_widget(attrs={'class': input_classes}) }}
+                        {% render_field field class=input_classes %}
                         {% if field.errors %}
                             <ul class="mt-2 space-y-1 text-sm text-rose-600">
                                 {% for error in field.errors %}

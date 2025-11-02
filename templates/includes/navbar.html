@@ -2,7 +2,7 @@
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
 {% get_language_info_list for LANGUAGES as LANGUAGE_INFO %}
-{% with request.resolver_match.app_name as current_app %}
+{% with match=request.resolver_match current_app=match.app_name current_view=match.url_name %}
 <nav class="sticky top-0 z-50 border-b border-emerald-100 bg-white/90 backdrop-blur">
     <div class="mx-auto w-full max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -20,12 +20,7 @@
                     <a href="{% url 'orders:list' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 {% if current_app == 'orders' %}bg-emerald-100 text-emerald-700 shadow-sm{% else %}text-slate-600 hover:text-emerald-600{% endif %}">{% trans "My orders" %}</a>
                     <a href="{% url 'deliveries:list' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 {% if current_app == 'deliveries' %}bg-emerald-100 text-emerald-700 shadow-sm{% else %}text-slate-600 hover:text-emerald-600{% endif %}">{% trans "Deliveries" %}</a>
                     {% if user.role == 'customer' %}
-                        <a href="{% url 'orders:cart' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-slate-600 hover:text-emerald-600">{% trans "My cart" %}</a>
-                    {% elif user.role == 'farmer' %}
-                        <a href="{% url 'products:manage' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-slate-600 hover:text-emerald-600">{% trans "My catalogue" %}</a>
-                        <a href="{% url 'products:create' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-emerald-700 hover:text-emerald-600">{% trans "Add product" %}</a>
-                    {% elif user.role == 'admin' %}
-                        <a href="{% url 'admin:index' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-slate-600 hover:text-emerald-600">{% trans "Admin console" %}</a>
+                        <a href="{% url 'orders:cart' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 {% if current_app == 'orders' and current_view == 'cart' %}bg-emerald-100 text-emerald-700 shadow-sm{% else %}text-slate-600 hover:text-emerald-600{% endif %}">{% trans "My cart" %}</a>
                     {% endif %}
                 {% endif %}
             </div>
