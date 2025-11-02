@@ -8,16 +8,47 @@ from django.utils.translation import gettext_lazy as _
 from .models import User
 
 
-class UserRegistrationForm(UserCreationForm):
+class StyledFormMixin:
+    """Apply consistent Tailwind classes to form widgets."""
+
+    input_class = (
+        "mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm "
+        "text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none "
+        "focus:ring-2 focus:ring-emerald-200"
+    )
+    checkbox_class = "mt-2 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        super().__init__(*args, **kwargs)
+        self._apply_widget_styling()
+
+    def _apply_widget_styling(self) -> None:
+        text_like_inputs = {"text", "email", "password", "tel", "number", "url", "search"}
+        fields = getattr(self, "fields", {})
+        for name, field in fields.items():
+            widget = field.widget
+            css_class = self.input_class
+            if isinstance(widget, forms.CheckboxInput):
+                css_class = self.checkbox_class
+            existing_classes = widget.attrs.get("class", "").strip()
+            widget.attrs["class"] = f"{existing_classes} {css_class}".strip()
+
+            input_type = getattr(widget, "input_type", None)
+            if input_type in text_like_inputs or isinstance(widget, forms.Textarea):
+                widget.attrs.setdefault("placeholder", field.label or "")
+                widget.attrs.setdefault("autocomplete", name)
+
+
+class UserRegistrationForm(StyledFormMixin, UserCreationForm):
     """Form used for farmer and customer sign-up."""
 
     role = forms.ChoiceField(choices=User.Roles.choices, label=_("Account Type"))
     preferred_language = forms.ChoiceField(
-        choices=[("en", _("English")), ("hi", _("Hindi"))],
+        choices=User.PREFERRED_LANGUAGE_CHOICES,
         label=_("Preferred Language"),
     )
 
-    class Meta(UserCreationForm.Meta):
+    class Meta(UserCreationForm.Meta):  # type: ignore[attr-defined]
         model = User
         fields = (
             "username",
@@ -31,7 +62,7 @@ class UserRegistrationForm(UserCreationForm):
         )
 
 
-class ProfileForm(forms.ModelForm):
+class ProfileForm(StyledFormMixin, forms.ModelForm):
     """Allow users to update contact details."""
 
     class Meta:
@@ -39,7 +70,7 @@ class ProfileForm(forms.ModelForm):
         fields = ("first_name", "last_name", "phone_number", "address")
 
 
-class LoginForm(AuthenticationForm):
+class LoginForm(StyledFormMixin, AuthenticationForm):
     """Customized login form with remember-me option."""
 
     remember_me = forms.BooleanField(

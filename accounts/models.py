@@ -14,6 +14,12 @@ class User(AbstractUser):
         CUSTOMER = "customer", _("Customer")
         ADMIN = "admin", _("Administrator")
 
+    PREFERRED_LANGUAGE_CHOICES = (
+        ("en", _("English")),
+        ("hi", _("Hindi")),
+        ("mr", _("Marathi")),
+    )
+
     role = models.CharField(
         max_length=20,
         choices=Roles.choices,
@@ -27,7 +33,7 @@ class User(AbstractUser):
     )
     preferred_language = models.CharField(
         max_length=8,
-        choices=[("en", "English"), ("hi", "Hindi")],
+        choices=PREFERRED_LANGUAGE_CHOICES,
         default="en",
         help_text=_("Preferred language for the interface."),
     )
@@ -44,7 +50,9 @@ class User(AbstractUser):
         return self.role == self.Roles.CUSTOMER
 
     def __str__(self) -> str:
-        return f"{self.get_full_name() or self.username} ({self.get_role_display()})"
+        display_role = self.get_role_display()  # type: ignore[attr-defined]
+        name = self.get_full_name() or self.username
+        return f"{name} ({display_role})"
 
     def get_dashboard_url(self) -> str:
         """Return the named URL for the user dashboard."""

@@ -18,33 +18,31 @@
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
-            {% with input_classes="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" %}
-                <div>
-                    <label for="id_username" class="block text-sm font-semibold text-slate-700">{% trans "Username" %}</label>
-                    {{ form.username.as_widget(attrs={'class': input_classes, 'placeholder': form.username.label, 'autocomplete': 'username'}) }}
-                    {% if form.username.errors %}
-                        <ul class="mt-2 space-y-1 text-sm text-rose-600">
-                            {% for error in form.username.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-                <div>
-                    <label for="id_password" class="block text-sm font-semibold text-slate-700">{% trans "Password" %}</label>
-                    {{ form.password.as_widget(attrs={'class': input_classes, 'placeholder': form.password.label, 'autocomplete': 'current-password'}) }}
-                    {% if form.password.errors %}
-                        <ul class="mt-2 space-y-1 text-sm text-rose-600">
-                            {% for error in form.password.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            {% endwith %}
+            <div>
+                <label for="id_username" class="block text-sm font-semibold text-slate-700">{% trans "Username" %}</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div>
+                <label for="id_password" class="block text-sm font-semibold text-slate-700">{% trans "Password" %}</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
             <div class="flex items-center justify-between">
                 <label for="id_remember_me" class="flex items-center gap-2 text-sm text-slate-700">
-                    {{ form.remember_me.as_widget(attrs={'class': 'h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500'}) }}
+                    {{ form.remember_me }}
                     <span>{{ form.remember_me.label }}</span>
                 </label>
                 <span class="text-xs text-slate-400">{% trans "Need help signing in?" %}</span>

@@ -4,7 +4,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-31 00:00+0000\n"
 "PO-Revision-Date: 2025-10-31 00:00+0000\n"
-"Last-Translator: Auto Generated <noreply@example.com>\n"
+"Last-Translator: RuralMarkNet Team <support@ruralmarknet.example>\n"
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
@@ -14,3 +14,91 @@ msgstr ""
 #: templates/base.html:6
 msgid "RuralMarkNet"
 msgstr "RuralMarkNet"
+
+#: templates/base.html:10
+msgid "Marketplace empowering farmers to sell directly to their communities."
+msgstr "Marketplace empowering farmers to sell directly to their communities."
+
+#: templates/base.html:15
+msgid "Skip to content"
+msgstr "Skip to content"
+
+#: templates/base.html:23
+msgid "Connecting farmers and customers through transparent, community-focused commerce."
+msgstr "Connecting farmers and customers through transparent, community-focused commerce."
+
+#: templates/base.html:27
+msgid "Built with care for rural communities."
+msgstr "Built with care for rural communities."
+
+#: templates/includes/navbar.html:14
+msgid "Market access for every harvest."
+msgstr "Market access for every harvest."
+
+#: templates/includes/navbar.html:22
+msgid "Marketplace"
+msgstr "Marketplace"
+
+#: templates/includes/navbar.html:24
+msgid "My orders"
+msgstr "My orders"
+
+#: templates/includes/navbar.html:25
+msgid "Deliveries"
+msgstr "Deliveries"
+
+#: templates/includes/navbar.html:32
+msgid "Select language"
+msgstr "Select language"
+
+#: templates/includes/navbar.html:36
+msgid "Apply"
+msgstr "Apply"
+
+#: templates/includes/navbar.html:41
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: templates/includes/navbar.html:42
+msgid "Logout"
+msgstr "Logout"
+
+#: templates/includes/navbar.html:44
+msgid "Login"
+msgstr "Login"
+
+#: templates/includes/navbar.html:45
+msgid "Sign up"
+msgstr "Sign up"
+
+#: templates/includes/messages.html:11
+msgid "Error"
+msgstr "Error"
+
+#: templates/includes/messages.html:12
+msgid "Something needs attention"
+msgstr "Something needs attention"
+
+#: templates/includes/messages.html:21
+msgid "Warning"
+msgstr "Warning"
+
+#: templates/includes/messages.html:22
+msgid "Please review"
+msgstr "Please review"
+
+#: templates/includes/messages.html:31
+msgid "Success"
+msgstr "Success"
+
+#: templates/includes/messages.html:32
+msgid "All set"
+msgstr "All set"
+
+#: templates/includes/messages.html:41
+msgid "Heads up"
+msgstr "Heads up"
+
+#: templates/includes/messages.html:17
+msgid "Information"
+msgstr "Information"

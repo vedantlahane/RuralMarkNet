@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -116,8 +117,9 @@ USE_L10N = True
 USE_TZ = True
 
 LANGUAGES = [
-    ("en", "English"),
-    ("hi", "Hindi"),
+    ("en", _("English")),
+    ("hi", _("Hindi")),
+    ("mr", _("Marathi")),
 ]
 
 LOCALE_PATHS = [BASE_DIR / "locale"]

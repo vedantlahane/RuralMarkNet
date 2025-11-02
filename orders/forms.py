@@ -19,3 +19,19 @@ class DeliveryScheduleForm(forms.Form):
         label=_("Preferred slot"),
     )
     notes = forms.CharField(required=False, widget=forms.Textarea, label=_("Notes"))
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        input_classes = (
+            "mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm "
+            "text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none "
+            "focus:ring-2 focus:ring-emerald-200"
+        )
+        for name, field in self.fields.items():
+            existing_class = field.widget.attrs.get("class", "")
+            merged = f"{existing_class} {input_classes}".strip()
+            field.widget.attrs["class"] = merged
+            field.widget.attrs.setdefault("placeholder", field.label)
+            if name == "scheduled_date":
+                # Date inputs already set type="date"; keep placeholder simple.
+                field.widget.attrs.setdefault("placeholder", field.label)

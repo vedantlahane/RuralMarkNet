@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView as DjangoLogoutView
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -40,6 +40,16 @@ class RuralLoginView(LoginView):
 
     form_class = LoginForm
     template_name = "accounts/login.html"
+
+
+class RuralLogoutView(DjangoLogoutView):
+    """Re-enable GET requests for logout while keeping Django's logic."""
+
+    http_method_names = ["get", "post", "options"]
+
+    def get(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponse:
+        # Delegate to the built-in POST handler so session cleanup stays consistent.
+        return super().post(request, *args, **kwargs)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
