@@ -3,7 +3,7 @@
 
 {% block content %}
 {{ block.super }}
-<section class="mt-10 grid gap-6 md:grid-cols-2">
+<section class="mt-10 grid gap-6 lg:grid-cols-3">
     <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
         <h2 class="text-xl font-semibold text-slate-900">{% trans "Logistics Overview" %}</h2>
         <p class="mt-2 text-sm text-slate-500">{% trans "Stay ahead by monitoring inventory levels and pending deliveries." %}</p>
@@ -18,12 +18,46 @@
             </div>
         </div>
     </div>
-    <div class="rounded-3xl bg-emerald-50 p-6">
-        <h3 class="text-lg font-semibold text-emerald-900">{% trans "Grow your reach" %}</h3>
-        <p class="mt-3 text-sm text-emerald-800">
-            {% trans "Regularly refresh listings and confirm delivery slots so customers enjoy reliable service." %}
-        </p>
-        <a href="{% url 'products:create' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500">{% trans "Add new product" %}</a>
+    {% if inventory_alerts %}
+        <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <h3 class="text-lg font-semibold text-slate-900">{% trans "Inventory alerts" %}</h3>
+            <p class="mt-2 text-sm text-slate-500">{% trans "Restock these items soon to avoid missed orders." %}</p>
+            <ul class="mt-4 space-y-3 text-sm text-slate-600">
+                {% for product in inventory_alerts %}
+                    <li class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                        <span>{{ product.name }}</span>
+                        <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600">{{ product.inventory }} {% trans "left" %}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="rounded-3xl bg-slate-50 p-6 text-sm text-slate-600">
+            <h3 class="text-lg font-semibold text-slate-900">{% trans "Stock looks great" %}</h3>
+            <p class="mt-3">{% trans "All your listings are above the low-stock threshold." %}</p>
+        </div>
+    {% endif %}
+    <div class="space-y-6">
+        {% if recent_customers %}
+            <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+                <h3 class="text-lg font-semibold text-slate-900">{% trans "Recent customers" %}</h3>
+                <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                    {% for customer in recent_customers %}
+                        <li class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-2">
+                            <span>{{ customer.get_full_name|default:customer.username }}</span>
+                            <span class="text-xs text-slate-400">@{{ customer.username }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <div class="rounded-3xl bg-emerald-50 p-6">
+            <h3 class="text-lg font-semibold text-emerald-900">{% trans "Grow your reach" %}</h3>
+            <p class="mt-3 text-sm text-emerald-800">
+                {% trans "Regularly refresh listings and confirm delivery slots so customers enjoy reliable service." %}
+            </p>
+            <a href="{% url 'products:create' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500">{% trans "Add new product" %}</a>
+        </div>
     </div>
 </section>
 {% endblock %}

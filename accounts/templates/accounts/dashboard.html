@@ -13,36 +13,52 @@
                     {% blocktrans %}Hello {{ user.first_name|default:user.username }}{% endblocktrans %}
                 </h1>
                 <p class="max-w-2xl text-white/90">{% trans "Track marketplace activity, deliveries, and recent actions in one place." %}</p>
-            </div>
-            <div class="grid w-full max-w-xs grid-cols-1 gap-4 text-sm">
-                <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
-                    <p class="text-white/80">{% trans "Recent orders" %}</p>
-                    <span class="text-2xl font-semibold">{{ orders|length }}</span>
-                </div>
-                <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
-                    <p class="text-white/80">{% trans "Active products" %}</p>
-                    <span class="text-2xl font-semibold">{{ products|length }}</span>
-                </div>
-                <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
-                    <p class="text-white/80">{% trans "Last sign in" %}</p>
-                    <span class="text-right text-base font-semibold">
-                        {% if user.last_login %}
-                            {{ user.last_login|date:"SHORT_DATE_FORMAT" }}
-                        {% else %}
-                            {% trans "First login" %}
-                        {% endif %}
+                {% if role_badge %}
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/80 backdrop-blur">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>{{ role_badge }}
                     </span>
-                </div>
+                {% endif %}
+            </div>
+            <div class="grid w-full max-w-xl grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                {% for card in summary_cards %}
+                    <div class="flex flex-col rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{{ card.label }}</p>
+                        <span class="mt-1 text-2xl font-semibold text-white">{{ card.value }}</span>
+                        {% if card.helper %}
+                            <p class="mt-2 text-xs text-white/70">{{ card.helper }}</p>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="flex items-center justify-between rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
+                        <p class="text-white/80">{% trans "Stay tuned" %}</p>
+                        <span class="text-2xl font-semibold">–</span>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+
+    {% if quick_actions %}
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {% for action in quick_actions %}
+                <a href="{{ action.url }}" class="group flex h-full flex-col justify-between rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-emerald-50 transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-center gap-3 text-sm font-semibold text-emerald-600">
+                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-base">{{ action.icon }}</span>
+                        <span class="text-slate-900">{{ action.label }}</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-600">{{ action.description }}</p>
+                    <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-600">{% trans "Go" %}<span aria-hidden="true">→</span></span>
+                </a>
+            {% endfor %}
+        </section>
+    {% endif %}
 
     <div class="grid gap-6 md:grid-cols-2">
         <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
             <header class="flex items-center justify-between pb-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-slate-900">{% trans "Recent Orders" %}</h2>
-                    <p class="text-sm text-slate-500">{% trans "Latest activity from your marketplace." %}</p>
+                    <h2 class="text-xl font-semibold text-slate-900">{{ orders_title }}</h2>
+                    <p class="text-sm text-slate-500">{{ orders_subtitle }}</p>
                 </div>
                 <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">🛒</span>
             </header>
@@ -51,7 +67,12 @@
                     <li class="flex items-center justify-between py-4 text-sm text-slate-700">
                         <div class="flex flex-col">
                             <span class="font-medium">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</span>
-                            <span class="text-xs text-slate-500">{{ order.created_at|date:"SHORT_DATE_FORMAT" }}</span>
+                            <span class="text-xs text-slate-500">
+                                {{ order.created_at|date:"SHORT_DATE_FORMAT" }}
+                                {% if order.customer and role != user.Roles.CUSTOMER %}
+                                    · {% trans "Customer" %}: {{ order.customer.get_full_name|default:order.customer.username }}
+                                {% endif %}
+                            </span>
                         </div>
                         <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{{ order.get_status_display }}</span>
                     </li>
@@ -60,15 +81,15 @@
                 {% endfor %}
             </ul>
             <div class="mt-4 flex justify-end">
-                <a href="{% url 'orders:list' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">{% trans "View all orders" %}</a>
+                <a href="{% url orders_link_name %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">{{ orders_cta_label }}</a>
             </div>
         </section>
 
         <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
             <header class="flex items-center justify-between pb-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-slate-900">{% trans "Recent Products" %}</h2>
-                    <p class="text-sm text-slate-500">{% trans "Fresh items ready for your customers." %}</p>
+                    <h2 class="text-xl font-semibold text-slate-900">{{ products_title }}</h2>
+                    <p class="text-sm text-slate-500">{{ products_subtitle }}</p>
                 </div>
                 <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">🌾</span>
             </header>
@@ -77,7 +98,13 @@
                     <li class="flex items-center justify-between py-4 text-sm text-slate-700">
                         <div>
                             <p class="font-medium">{{ product.name }}</p>
-                            <p class="text-xs text-slate-500">{{ product.get_category_display }} · {{ product.location }}</p>
+                            <p class="text-xs text-slate-500">
+                                {{ product.get_category_display }}
+                                {% if product.location %} · {{ product.location }}{% endif %}
+                                {% if product.purchase_count %}
+                                    · {% blocktrans count product.purchase_count as purchase_count %}{{ purchase_count }} order{% plural %}{{ purchase_count }} orders{% endblocktrans %}
+                                {% endif %}
+                            </p>
                         </div>
                         <p class="font-semibold text-emerald-600">₹ {{ product.price }}</p>
                     </li>
@@ -86,9 +113,25 @@
                 {% endfor %}
             </ul>
             <div class="mt-4 flex justify-end">
-                <a href="{% url 'products:list' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">{% trans "Browse marketplace" %}</a>
+                <a href="{% url products_link_name %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">{{ products_cta_label }}</a>
             </div>
         </section>
     </div>
 </section>
+{% if platform_stats %}
+<section class="mt-10 grid gap-4 sm:grid-cols-3">
+    <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+        <p class="text-sm font-semibold text-slate-600">{% trans "Active listings" %}</p>
+        <p class="mt-2 text-2xl font-semibold text-slate-900">{{ platform_stats.active_products }}</p>
+    </div>
+    <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+        <p class="text-sm font-semibold text-slate-600">{% trans "Total orders" %}</p>
+        <p class="mt-2 text-2xl font-semibold text-slate-900">{{ platform_stats.total_orders }}</p>
+    </div>
+    <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+        <p class="text-sm font-semibold text-slate-600">{% trans "Gross merchandise value" %}</p>
+        <p class="mt-2 text-2xl font-semibold text-slate-900">{{ platform_stats.total_gmv }}</p>
+    </div>
+</section>
+{% endif %}
 {% endblock %}

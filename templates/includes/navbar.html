@@ -19,6 +19,14 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'orders:list' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 {% if current_app == 'orders' %}bg-emerald-100 text-emerald-700 shadow-sm{% else %}text-slate-600 hover:text-emerald-600{% endif %}">{% trans "My orders" %}</a>
                     <a href="{% url 'deliveries:list' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 {% if current_app == 'deliveries' %}bg-emerald-100 text-emerald-700 shadow-sm{% else %}text-slate-600 hover:text-emerald-600{% endif %}">{% trans "Deliveries" %}</a>
+                    {% if user.role == 'customer' %}
+                        <a href="{% url 'orders:cart' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-slate-600 hover:text-emerald-600">{% trans "My cart" %}</a>
+                    {% elif user.role == 'farmer' %}
+                        <a href="{% url 'products:manage' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-slate-600 hover:text-emerald-600">{% trans "My catalogue" %}</a>
+                        <a href="{% url 'products:create' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-emerald-700 hover:text-emerald-600">{% trans "Add product" %}</a>
+                    {% elif user.role == 'admin' %}
+                        <a href="{% url 'admin:index' %}" class="rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 text-slate-600 hover:text-emerald-600">{% trans "Admin console" %}</a>
+                    {% endif %}
                 {% endif %}
             </div>
 
