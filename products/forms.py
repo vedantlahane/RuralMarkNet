@@ -2,7 +2,11 @@
 from __future__ import annotations
 
 from django import forms
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+from typing import cast
+
+from accounts.models import User
 
 from .models import Product
 
@@ -17,11 +21,39 @@ class ProductForm(forms.ModelForm):
             "category",
             "description",
             "price",
+            "unit",
+            "unit_quantity",
+            "quality_grade",
+            "farming_practice",
+            "harvest_date",
+            "best_before_days",
             "inventory",
             "available",
             "location",
+            "storage_instructions",
+            "certifications",
             "image",
         )
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "storage_instructions": forms.Textarea(attrs={"rows": 3}),
+            "harvest_date": forms.DateInput(attrs={"type": "date"}),
+        }
+
+
+class AdminProductForm(ProductForm):
+    """Extended form that lets administrators assign farmers."""
+
+    farmer = forms.ModelChoiceField(label=_("Farmer"), queryset=get_user_model().objects.none())
+
+    class Meta(ProductForm.Meta):
+        fields = ("farmer",) + ProductForm.Meta.fields
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user_model = cast("type[User]", get_user_model())
+        farmer_field = cast(forms.ModelChoiceField, self.fields["farmer"])
+        farmer_field.queryset = user_model.objects.filter(role=User.Roles.FARMER)
 
 
 class ProductFilterForm(forms.Form):

@@ -248,7 +248,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 "helper": _("Visible in the marketplace"),
             },
             {
-                "label": _("Pending fulfilment"),
+                "label": _("Pending deliveries"),
                 "value": str(pending_delivery_count),
                 "helper": _("Deliveries awaiting action"),
             },
@@ -363,30 +363,27 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "role_badge": _("Administrator overview"),
             "quick_actions": [
                 {
-                    "label": _("Open admin site"),
-                    "description": _("Manage users, permissions, and content."),
-                    "url": reverse("admin:index"),
-                    "icon": "🛠️",
-                },
-                {
                     "label": _("Review orders"),
                     "description": _("Audit transactions and fulfilment status."),
-                    "url": reverse("orders:list"),
-                    "icon": "📑",
+                    "url": reverse("orders:admin-list"),
+                    "icon": "🧾",
                 },
                 {
                     "label": _("Monitor deliveries"),
                     "description": _("Track handoffs happening across the marketplace."),
                     "url": reverse("deliveries:list"),
-                    "icon": "📍",
+                    "icon": "🚚",
+                },
+                {
+                    "label": _("Manage farmers"),
+                    "description": _("View and support active producers on the platform."),
+                    "url": reverse("accounts:dashboard"),
+                    "icon": "🌿",
                 },
             ],
             "orders_title": _("Marketplace Orders"),
             "orders_subtitle": _("Latest transactions across RuralMarkNet."),
             "products_title": _("Top products"),
-            "products_subtitle": _("Popular items based on fulfilled orders."),
-            "products_cta_label": _("View catalog"),
-            "orders_cta_label": _("View orders"),
             "platform_stats": {
                 "active_products": active_products,
                 "total_orders": total_orders,

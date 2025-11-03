@@ -4,7 +4,7 @@
 {% block title %}{% trans "Manage product" %}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-3xl">
+<div class="mx-auto max-w-5xl">
     <div class="rounded-3xl bg-white p-8 shadow-lg ring-1 ring-emerald-50">
         <div class="mb-8 space-y-2">
             <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Product management" %}</p>
@@ -13,7 +13,7 @@
             </h1>
             <p class="text-sm text-slate-500">{% trans "Provide detailed information so customers can make confident choices." %}</p>
         </div>
-        <form method="post" enctype="multipart/form-data" class="space-y-6">
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
             {% csrf_token %}
             {% if form.non_field_errors %}
                 <div class="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -21,33 +21,47 @@
                 </div>
             {% endif %}
             {% with input_classes="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" file_classes="mt-2 block w-full text-sm text-slate-600" %}
-                {% for field in form %}
-                    <div>
-                        {% if field.field.widget.input_type != "checkbox" %}
-                            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700">{{ field.label }}</label>
-                        {% endif %}
-                        {% if field.field.widget.input_type == "file" %}
-                            {% render_field field class=file_classes %}
-                        {% elif field.field.widget.input_type == "checkbox" %}
-                            <label class="flex items-center gap-2 text-sm text-slate-700">
-                                {% render_field field class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" %}
-                                <span>{{ field.label }}</span>
-                            </label>
+                <div class="grid gap-6 md:grid-cols-2">
+                    {% for field in form %}
+                        {% if field.field.widget.input_type == "checkbox" %}
+                            <div class="md:col-span-2">
+                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                    {% render_field field class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" %}
+                                    <span>{{ field.label }}</span>
+                                </label>
+                            {% if field.help_text %}
+                                <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                            {% endif %}
+                            {% if field.errors %}
+                                <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            </div>
                         {% else %}
-                            {% render_field field class=input_classes placeholder=field.label %}
+                            <div class="{% if field.field.widget.input_type == "file" or field.name == "description" or field.name == "storage_instructions" or field.name == "certifications" %}md:col-span-2{% endif %}">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700">{{ field.label }}</label>
+                                {% if field.field.widget.input_type == "file" %}
+                                    {% render_field field class=file_classes %}
+                                {% else %}
+                                    {% render_field field class=input_classes placeholder=field.label %}
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
                         {% endif %}
-                        {% if field.help_text %}
-                            <p class="mt-2 text-xs text-slate-500">{{ field.help_text }}</p>
-                        {% endif %}
-                        {% if field.errors %}
-                            <ul class="mt-2 space-y-1 text-sm text-rose-600">
-                                {% for error in field.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             {% endwith %}
             <div class="flex items-center justify-end gap-3">
                 <a href="{% url 'products:manage' %}" class="text-sm font-medium text-slate-500 hover:text-slate-700">{% trans "Cancel" %}</a>

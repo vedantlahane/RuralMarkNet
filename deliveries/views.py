@@ -9,6 +9,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import UpdateView
 
+from accounts.models import User
+
 from .forms import DeliveryUpdateForm
 from .models import Delivery
 
@@ -21,6 +23,8 @@ class DeliveryListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):  # type: ignore[override]
         user = self.request.user
+        if getattr(user, "role", None) == User.Roles.ADMIN:
+            return Delivery.objects.select_related("order", "order__customer", "assigned_farmer")
         return Delivery.objects.filter(
             Q(order__customer=user) | Q(assigned_farmer=user)
         ).select_related("order", "order__customer")
@@ -34,6 +38,8 @@ class DeliveryDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):  # type: ignore[override]
         user = self.request.user
+        if getattr(user, "role", None) == User.Roles.ADMIN:
+            return Delivery.objects.all()
         return Delivery.objects.filter(
             Q(order__customer=user) | Q(assigned_farmer=user)
         )
@@ -44,14 +50,20 @@ class FarmerOnlyMixin(UserPassesTestMixin):
 
     def test_func(self) -> bool:
         delivery: Delivery = self.get_object()  # type: ignore[assignment]
+        request = getattr(self, "request", None)
+        user = getattr(request, "user", None)
+        if getattr(user, "role", None) == User.Roles.ADMIN:
+            return True
         return bool(
-            self.request.user.is_authenticated
-            and self.request.user.is_farmer
-            and delivery.assigned_farmer_id == self.request.user.id
+            getattr(user, "is_authenticated", False)
+            and getattr(user, "is_farmer", False)
+            and getattr(delivery, "assigned_farmer_id", None) == getattr(user, "id", None)
         )
 
     def handle_no_permission(self):  # type: ignore[override]
-        messages.error(self.request, _("You are not allowed to update this delivery."))
+        request = getattr(self, "request", None)
+        if request is not None:
+            messages.error(request, _("You are not allowed to update this delivery."))
         return super().handle_no_permission()
 
 

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Product administration" %}{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-semibold text-slate-900">{% trans "Product administration" %}</h1>
+            <p class="text-sm text-slate-500">{% trans "Review and update listings published by farmers." %}</p>
+        </div>
+    </header>
+    <div class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-emerald-50">
+        <table class="min-w-full divide-y divide-slate-100 text-left text-sm text-slate-700">
+            <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                    <th class="px-4 py-3">{% trans "Product" %}</th>
+                    <th class="px-4 py-3">{% trans "Farmer" %}</th>
+                    <th class="px-4 py-3">{% trans "Category" %}</th>
+                    <th class="px-4 py-3">{% trans "Price" %}</th>
+                    <th class="px-4 py-3">{% trans "Inventory" %}</th>
+                    <th class="px-4 py-3 text-right">{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for product in products %}
+                    <tr class="hover:bg-emerald-50/40">
+                        <td class="px-4 py-3 font-medium text-slate-900">
+                            {{ product.name }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {{ product.farmer.get_full_name|default:product.farmer.username }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {{ product.get_category_display }}
+                        </td>
+                        <td class="px-4 py-3">
+                            ₹ {{ product.price }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {{ product.inventory }}
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{% url 'products:admin-update' product.slug %}" class="inline-flex items-center gap-2 rounded-full border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50">{% trans "Edit" %}</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">{% trans "No products found." %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

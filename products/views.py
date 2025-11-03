@@ -1,16 +1,48 @@
-"""Views for product catalogue and management."""
+"""Views for product catalogue, management and localisation."""
 from __future__ import annotations
+
+from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, ListView
+from django.utils.decorators import method_decorator
+from django.utils.translation import check_for_language, gettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import CreateView, UpdateView
+from django.views.i18n import set_language as django_set_language
 
-from .forms import ProductFilterForm, ProductForm
+from orders.forms import AddToCartForm
+
+from accounts.mixins import AdminRequiredMixin
+
+from .forms import AdminProductForm, ProductFilterForm, ProductForm
 from .models import Product
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(require_POST, name="dispatch")
+class LanguageSwitchView(View):
+    """Ensure language changes also persist to the session for dashboard users."""
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        response = django_set_language(request)
+
+        if not hasattr(request, "session"):
+            return response
+
+        lang_code = request.POST.get("language")
+        if not lang_code or not check_for_language(lang_code):
+            return response
+
+        request.session["django_language"] = lang_code
+        request.session.save()
+
+        return response
 
 
 class ProductListView(ListView):
@@ -55,15 +87,30 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
     slug_field = "slug"
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:  # type: ignore[override]
+        context = super().get_context_data(**kwargs)
+        product = context.get("product")
+        form = AddToCartForm(initial={"quantity": 1})
+        if product is not None:
+            max_quantity = getattr(product, "inventory", None)
+            if max_quantity is not None and max_quantity > 0:
+                form.fields["quantity"].widget.attrs["max"] = max_quantity
+        context["add_to_cart_form"] = form
+        return context
+
 
 class FarmerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """Ensure the logged-in user is a farmer."""
 
     def test_func(self) -> bool:
-        return bool(self.request.user.is_authenticated and self.request.user.is_farmer)
+        request = getattr(self, "request", None)
+        user = getattr(request, "user", None)
+        return bool(getattr(user, "is_authenticated", False) and getattr(user, "is_farmer", False))
 
     def handle_no_permission(self):  # type: ignore[override]
-        messages.error(self.request, _("You need a farmer account to manage listings."))
+        request = getattr(self, "request", None)
+        if request is not None:
+            messages.error(request, _("You need a farmer account to manage listings."))
         return super().handle_no_permission()
 
 
@@ -106,3 +153,29 @@ class FarmerProductListView(FarmerRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["create_url"] = reverse_lazy("products:create")
         return context
+
+
+class AdminProductListView(AdminRequiredMixin, ListView):
+    """Allow administrators to audit and manage all products."""
+
+    template_name = "products/admin_product_list.html"
+    context_object_name = "products"
+
+    def get_queryset(self):  # type: ignore[override]
+        return Product.objects.select_related("farmer").order_by("-updated_at")
+
+
+class AdminProductUpdateView(AdminRequiredMixin, UpdateView):
+    """Enable administrators to modify any product listing."""
+
+    form_class = AdminProductForm
+    template_name = "products/product_form.html"
+    slug_field = "slug"
+    success_url = reverse_lazy("products:admin-manage")
+
+    def get_queryset(self):  # type: ignore[override]
+        return Product.objects.select_related("farmer")
+
+    def form_valid(self, form):  # type: ignore[override]
+        messages.success(self.request, _("Product updated."))
+        return super().form_valid(form)

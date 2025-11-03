@@ -4,6 +4,8 @@ from __future__ import annotations
 from django.urls import path
 
 from .views import (
+    AdminOrderListView,
+    AdminOrderUpdateView,
     CartView,
     CheckoutView,
     OrderDetailView,
@@ -19,4 +21,6 @@ urlpatterns = [
     path("checkout/", CheckoutView.as_view(), name="checkout"),
     path("my/", OrderListView.as_view(), name="list"),
     path("my/<int:pk>/", OrderDetailView.as_view(), name="detail"),
+    path("admin/orders/", AdminOrderListView.as_view(), name="admin-list"),
+    path("admin/orders/<int:pk>/", AdminOrderUpdateView.as_view(), name="admin-update"),
 ]

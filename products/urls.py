@@ -4,6 +4,8 @@ from __future__ import annotations
 from django.urls import path
 
 from .views import (
+    AdminProductListView,
+    AdminProductUpdateView,
     FarmerProductListView,
     ProductCreateView,
     ProductDetailView,
@@ -20,4 +22,6 @@ urlpatterns = [
     path("products/new/", ProductCreateView.as_view(), name="create"),
     path("products/<slug:slug>/", ProductDetailView.as_view(), name="detail"),
     path("products/<slug:slug>/edit/", ProductUpdateView.as_view(), name="update"),
+    path("admin/products/", AdminProductListView.as_view(), name="admin-manage"),
+    path("admin/products/<slug:slug>/edit/", AdminProductUpdateView.as_view(), name="admin-update"),
 ]

@@ -21,7 +21,7 @@
                     ₹ {{ product.price }}
                 </span>
             </div>
-            <div class="grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
+            <div class="grid gap-4 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="rounded-2xl bg-slate-50 px-4 py-3">
                     <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Availability" %}</p>
                     {% if product.available %}
@@ -34,10 +34,46 @@
                     <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Inventory" %}</p>
                     <p class="mt-2 font-semibold text-slate-700">{{ product.inventory }}</p>
                 </div>
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Unit size" %}</p>
+                    <p class="mt-2 font-semibold text-slate-700">{{ product.unit_quantity|floatformat:2 }} {{ product.get_unit_display }}</p>
+                </div>
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Quality grade" %}</p>
+                    <p class="mt-2 font-semibold text-slate-700">{{ product.get_quality_grade_display }}</p>
+                </div>
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Farming practice" %}</p>
+                    <p class="mt-2 font-semibold text-slate-700">{{ product.get_farming_practice_display }}</p>
+                </div>
+                {% if product.harvest_date %}
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                        <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Harvest date" %}</p>
+                        <p class="mt-2 font-semibold text-slate-700">{{ product.harvest_date }}</p>
+                    </div>
+                {% endif %}
+                {% if product.best_before_days %}
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                        <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Best before" %}</p>
+                        <p class="mt-2 font-semibold text-slate-700">{% blocktrans with days=product.best_before_days %}{{ days }} day shelf life{% endblocktrans %}</p>
+                    </div>
+                {% endif %}
             </div>
             <div class="prose prose-sm max-w-none text-slate-700">
                 {{ product.description|linebreaks }}
             </div>
+            {% if product.storage_instructions %}
+                <div class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    <p class="text-xs uppercase tracking-wide text-emerald-700">{% trans "Storage guidance" %}</p>
+                    <p class="mt-2">{{ product.storage_instructions|linebreaksbr }}</p>
+                </div>
+            {% endif %}
+            {% if product.certifications %}
+                <div class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    <p class="text-xs uppercase tracking-wide text-emerald-700">{% trans "Certifications" %}</p>
+                    <p class="mt-2">{{ product.certifications }}</p>
+                </div>
+            {% endif %}
             <p class="text-sm text-slate-500">
                 {% trans "Farmer" %}:
                 {{ product.farmer.get_full_name|default:product.farmer.username }}
@@ -48,9 +84,33 @@
         <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
             <h2 class="text-xl font-semibold text-slate-900">{% trans "Order this product" %}</h2>
             <p class="mt-2 text-sm text-slate-600">{% trans "Add items to your cart and choose delivery during checkout." %}</p>
-            <a href="{% url 'orders:add-to-cart' product.pk %}" class="mt-5 inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">
-                {% trans "Add to cart" %}
-            </a>
+            {% if product.available %}
+                <form method="post" action="{% url 'orders:add-to-cart' product.pk %}" class="mt-5 space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label for="{{ add_to_cart_form.quantity.id_for_label }}" class="block text-sm font-semibold text-slate-700">{{ add_to_cart_form.quantity.label }}</label>
+                        {{ add_to_cart_form.quantity }}
+                        <p class="mt-1 text-xs text-slate-500">
+                            {% blocktrans with unit=product.get_unit_display unit_quantity=product.unit_quantity|floatformat:2 %}Each unit equals {{ unit_quantity }} {{ unit }}.{% endblocktrans %}
+                            {% if product.inventory %}{% blocktrans with inventory=product.inventory %}In stock: {{ inventory }} units available.{% endblocktrans %}{% endif %}
+                        </p>
+                        {% if add_to_cart_form.quantity.errors %}
+                            <ul class="mt-2 space-y-1 text-xs text-rose-600">
+                                {% for error in add_to_cart_form.quantity.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">
+                        {% trans "Add to cart" %}
+                    </button>
+                </form>
+            {% else %}
+                <div class="mt-5 rounded-2xl border border-dashed border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {% trans "This listing is currently paused. Check back soon or message the farmer for availability." %}
+                </div>
+            {% endif %}
         </div>
         <div class="rounded-3xl bg-emerald-50 p-6 text-sm text-emerald-900">
             <h3 class="text-lg font-semibold">{% trans "Need larger quantities?" %}</h3>
