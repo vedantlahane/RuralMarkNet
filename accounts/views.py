@@ -352,6 +352,8 @@ class DashboardAdminView(AdminRequiredMixin, DashboardBaseView):
             .order_by("-purchase_count", "name")[:5]
         )
 
+        recent_logs = list(AuditLog.objects.select_related("user")[:6])
+
         summary_cards = [
             {
                 "label": _("Farmers"),
@@ -413,6 +415,7 @@ class DashboardAdminView(AdminRequiredMixin, DashboardBaseView):
                 "total_orders": total_orders,
                 "total_gmv": self._format_currency(total_gmv),
             },
+            "recent_logs": recent_logs,
         }
 
 

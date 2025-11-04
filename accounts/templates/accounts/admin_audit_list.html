@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Audit Log" %}{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <header class="flex flex-col gap-2">
+        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Governance" %}</p>
+        <h1 class="text-3xl font-semibold text-slate-900">{% trans "Audit log" %}</h1>
+        <p class="text-sm text-slate-600">{% trans "Every sensitive administrative action is recorded for traceability." %}</p>
+        <a href="{% url 'portal-admin:dashboard' %}" class="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-500">← {% trans "Back to dashboard" %}</a>
+    </header>
+
+    <div class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-emerald-50">
+        <table class="min-w-full divide-y divide-slate-100 text-sm">
+            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                    <th scope="col" class="px-6 py-3">{% trans "Timestamp" %}</th>
+                    <th scope="col" class="px-6 py-3">{% trans "Action" %}</th>
+                    <th scope="col" class="px-6 py-3">{% trans "Actor" %}</th>
+                    <th scope="col" class="px-6 py-3">{% trans "Target" %}</th>
+                    <th scope="col" class="px-6 py-3">{% trans "Metadata" %}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+                {% for entry in logs %}
+                    <tr class="hover:bg-emerald-50/40">
+                        <td class="px-6 py-4 text-xs text-slate-500">{{ entry.created_at|date:"DATETIME_FORMAT" }}</td>
+                        <td class="px-6 py-4 font-medium text-slate-900">{{ entry.action }}</td>
+                        <td class="px-6 py-4">
+                            {% if entry.user %}
+                                {{ entry.user.get_full_name|default:entry.user.username }}
+                            {% else %}
+                                {% trans "System" %}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if entry.object_repr %}
+                                {{ entry.object_repr }}
+                            {% else %}
+                                <span class="text-xs text-slate-400">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if entry.metadata %}
+                                <ul class="space-y-1 text-xs text-slate-600">
+                                    {% for key, value in entry.metadata.items %}
+                                        <li><span class="font-semibold text-slate-500">{{ key }}:</span> {{ value }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <span class="text-xs text-slate-400">{% trans "No metadata" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-6 text-center text-sm text-slate-500">{% trans "No audit entries recorded yet." %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+        <nav class="flex items-center justify-between text-sm" aria-label="{% trans "Audit log pagination" %}">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="text-emerald-600 hover:text-emerald-500">{% trans "Previous" %}</a>
+            {% else %}
+                <span class="text-slate-400">{% trans "Previous" %}</span>
+            {% endif %}
+            <p class="text-slate-500">
+                {% blocktrans %}Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblocktrans %}
+            </p>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="text-emerald-600 hover:text-emerald-500">{% trans "Next" %}</a>
+            {% else %}
+                <span class="text-slate-400">{% trans "Next" %}</span>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

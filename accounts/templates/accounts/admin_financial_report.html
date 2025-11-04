@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Financial Report" %}{% endblock %}
+
+{% block content %}
+<section class="space-y-10">
+    <header class="space-y-2">
+        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Insights" %}</p>
+        <h1 class="text-3xl font-semibold text-slate-900">{% trans "Marketplace financial health" %}</h1>
+        <p class="text-sm text-slate-600">{% trans "Track gross merchandise value, payment outcomes, and high-performing products." %}</p>
+        <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+            <span>{% trans "Generated at" %} {{ report_generated_at|date:"DATETIME_FORMAT" }}</span>
+            <a href="{% url 'portal-admin:dashboard' %}" class="text-emerald-600 hover:text-emerald-500">← {% trans "Back to dashboard" %}</a>
+        </div>
+    </header>
+
+    <section class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Total GMV" %}</p>
+            <p class="mt-2 text-3xl font-semibold text-slate-900">{{ financials.gmv_total }}</p>
+            <p class="mt-1 text-xs text-slate-500">{% trans "Cumulative revenue collected across all orders." %}</p>
+        </article>
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Monthly GMV" %}</p>
+            <p class="mt-2 text-3xl font-semibold text-slate-900">{{ financials.gmv_month }}</p>
+            <p class="mt-1 text-xs text-slate-500">{% trans "Revenue generated since the start of the current month." %}</p>
+        </article>
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Orders" %}</p>
+            <p class="mt-2 text-3xl font-semibold text-slate-900">{{ financials.orders_total }}</p>
+            <p class="mt-1 text-xs text-slate-500">{% blocktrans %}{{ financials.orders_paid }} paid · {{ financials.orders_pending }} pending{% endblocktrans %}</p>
+        </article>
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Avg. order value" %}</p>
+            <p class="mt-2 text-3xl font-semibold text-slate-900">{{ financials.average_order_value }}</p>
+            <p class="mt-1 text-xs text-slate-500">{% trans "Based on all completed orders." %}</p>
+        </article>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-2">
+        <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <h2 class="text-xl font-semibold text-slate-900">{% trans "Payment status" %}</h2>
+            <p class="text-sm text-slate-500">{% trans "Success ratio of completed transactions and refund count." %}</p>
+            <dl class="mt-6 grid gap-4 text-sm text-slate-600">
+                <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                    <dt>{% trans "Successful payments" %}</dt>
+                    <dd class="font-semibold text-emerald-700">{{ financials.payments_success }}</dd>
+                </div>
+                <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                    <dt>{% trans "Refunded payments" %}</dt>
+                    <dd class="font-semibold text-rose-600">{{ financials.payments_refunded }}</dd>
+                </div>
+            </dl>
+        </div>
+        <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <h2 class="text-xl font-semibold text-slate-900">{% trans "Top performing products" %}</h2>
+            <p class="text-sm text-slate-500">{% trans "Ranked by confirmed, shipped, or delivered order items." %}</p>
+            <ul class="mt-6 divide-y divide-slate-100 text-sm text-slate-700">
+                {% for product in top_products %}
+                    <li class="flex items-center justify-between py-3">
+                        <div>
+                            <p class="font-medium text-slate-900">{{ product.name }}</p>
+                            <p class="text-xs text-slate-500">{{ product.get_category_display }}{% if product.location %} · {{ product.location }}{% endif %}</p>
+                        </div>
+                        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            {% blocktrans count product.purchase_count as purchase_count %}{{ purchase_count }} order{% plural %}{{ purchase_count }} orders{% endblocktrans %}
+                        </span>
+                    </li>
+                {% empty %}
+                    <li class="py-6 text-center text-sm text-slate-500">{% trans "No products match the reporting filters yet." %}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <section class="rounded-3xl bg-white p-6 text-sm text-slate-600 shadow-sm ring-1 ring-emerald-50">
+        <h2 class="text-xl font-semibold text-slate-900">{% trans "Recommendations" %}</h2>
+        <ul class="mt-4 list-disc space-y-2 pl-5">
+            <li>{% trans "Investigate pending orders that remain unpaid for extended periods." %}</li>
+            <li>{% trans "Encourage farmers to restock high performing products to sustain GMV." %}</li>
+            <li>{% trans "Review audit logs for any unusually high refund activity." %}</li>
+        </ul>
+    </section>
+</section>
+{% endblock %}
