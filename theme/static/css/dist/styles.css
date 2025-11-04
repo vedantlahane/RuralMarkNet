@@ -243,9 +243,6 @@
   }
 }
 @layer utilities {
-  .visible {
-    visibility: visible;
-  }
   @layer daisyui.component {
     .list {
       display: flex;

@@ -3,12 +3,16 @@ from __future__ import annotations
 
 from django.urls import path
 
-from .views import DeliveryDetailView, DeliveryListView, DeliveryUpdateView
+from .views import (
+    CustomerDeliveryListView,
+    CustomerDeliveryDetailView,
+    FarmerDeliveryUpdateView,
+)
 
 app_name = "deliveries"
 
 urlpatterns = [
-    path("", DeliveryListView.as_view(), name="list"),
-    path("<int:pk>/", DeliveryDetailView.as_view(), name="detail"),
-    path("<int:pk>/edit/", DeliveryUpdateView.as_view(), name="update"),
+    path("", CustomerDeliveryListView.as_view(), name="list"),
+    path("<int:pk>/", CustomerDeliveryDetailView.as_view(), name="detail"),
+    path("<int:pk>/edit/", FarmerDeliveryUpdateView.as_view(), name="update"),
 ]

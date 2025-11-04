@@ -11,7 +11,7 @@
             <h1 class="text-3xl font-semibold text-slate-900">{% trans "Manage produce" %}</h1>
             <p class="text-sm text-slate-500">{% trans "Keep details fresh so customers always know what is available." %}</p>
         </div>
-        <a href="{% url 'products:create' %}" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Add product" %}</a>
+    <a href="{% url 'portal-farmer:products-create' %}" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Add product" %}</a>
     </div>
 
     {% if object_list %}
@@ -51,7 +51,7 @@
                     </div>
                     <div class="mt-6 flex items-center justify-between text-sm font-medium">
                         <a href="{{ product.get_absolute_url }}" class="text-emerald-600 hover:text-emerald-500">{% trans "View listing" %}</a>
-                        <a href="{% url 'products:update' product.slug %}" class="text-slate-500 hover:text-slate-700">{% trans "Edit" %}</a>
+                        <a href="{% url 'portal-farmer:products-update' product.slug %}" class="text-slate-500 hover:text-slate-700">{% trans "Edit" %}</a>
                     </div>
                 </article>
             {% endfor %}
@@ -61,7 +61,7 @@
             <p class="text-4xl">🥕</p>
             <h2 class="mt-4 text-2xl font-semibold text-slate-700">{% trans "No products yet" %}</h2>
             <p class="mt-2 text-sm">{% trans "Start by adding your first listing so customers can discover your produce." %}</p>
-            <a href="{% url 'products:create' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500">{% trans "Create a product" %}</a>
+            <a href="{% url 'portal-farmer:products-create' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500">{% trans "Create a product" %}</a>
         </div>
     {% endif %}
 </section>

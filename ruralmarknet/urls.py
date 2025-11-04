@@ -15,11 +15,16 @@ urlpatterns = [
 
 i18n_urlpatterns = [
     path("admin/", admin.site.urls),
+    # Public-facing catalogue and checkout
     path("", include("products.urls")),
     path("accounts/", include("accounts.urls")),
     path("orders/", include("orders.urls")),
     path("deliveries/", include("deliveries.urls")),
     path("payments/", include("payments.urls")),
+    # Role-based portals (our application dashboards)
+    path("portal/admin/", include(("ruralmarknet.portal_admin_urls", "portal-admin"))),
+    path("portal/farmer/", include(("ruralmarknet.portal_farmer_urls", "portal-farmer"))),
+    path("portal/customer/", include(("ruralmarknet.portal_customer_urls", "portal-customer"))),
 ]
 
 urlpatterns += i18n_urlpatterns

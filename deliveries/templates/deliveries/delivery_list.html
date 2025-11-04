@@ -21,7 +21,7 @@
                     </div>
                     <p class="text-sm text-slate-500">{% trans "Last updated" %}: {{ delivery.updated_at|date:"SHORT_DATE_FORMAT" }}</p>
                     <div class="flex items-center justify-end">
-                        <a href="{% url 'deliveries:detail' delivery.pk %}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-500">{% trans "View details" %}</a>
+                        <a href="{% url detail_url_name delivery.pk %}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-500">{% trans "View details" %}</a>
                     </div>
                 </article>
             {% endfor %}

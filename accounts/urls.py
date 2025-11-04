@@ -5,12 +5,10 @@ from django.contrib.auth.views import PasswordChangeView
 from django.urls import path, reverse_lazy
 
 from .views import (
-    CustomerDashboardView,
-    FarmerDashboardView,
+    DashboardCustomerView,
     RuralLoginView,
     RuralLogoutView,
     SignUpView,
-    DashboardView,
     redirect_to_role_dashboard,
     update_profile,
 )
@@ -23,12 +21,10 @@ urlpatterns = [
     path("logout/", RuralLogoutView.as_view(next_page="products:home"), name="logout"),
     path("profile/", update_profile, name="profile"),
     path("switch-dashboard/", redirect_to_role_dashboard, name="switch-dashboard"),
-    path("dashboard/", DashboardView.as_view(), name="dashboard"),
-    path("dashboard/customer/", CustomerDashboardView.as_view(), name="customer-dashboard"),
-    path("dashboard/farmer/", FarmerDashboardView.as_view(), name="farmer-dashboard"),
+    path("dashboard/", DashboardCustomerView.as_view(), name="customer-dashboard"),
     path(
         "password-change/",
-        PasswordChangeView.as_view(success_url=reverse_lazy("accounts:dashboard")),
+        PasswordChangeView.as_view(success_url=reverse_lazy("accounts:switch-dashboard")),
         name="password_change",
     ),
 ]

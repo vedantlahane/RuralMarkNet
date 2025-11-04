@@ -1,9 +1,10 @@
 """Views for order placement and tracking."""
 from __future__ import annotations
 
+from typing import cast
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -11,7 +12,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import FormView, UpdateView
 
-from accounts.mixins import AdminRequiredMixin
+from accounts.mixins import AdminRequiredMixin, CustomerRequiredMixin, OwnerRequiredMixin
+from accounts.models import AuditLog, User
 
 from products.models import Product
 
@@ -41,6 +43,11 @@ def add_to_cart(request: HttpRequest, product_id: int) -> HttpResponse:
     """Add a product to the authenticated user's cart with custom quantity."""
 
     product = get_object_or_404(Product, pk=product_id, available=True)
+    user = cast(User, request.user)
+    if not getattr(user, "is_customer", False):
+        messages.error(request, _("Only customers can modify carts."))
+        return redirect(user.get_dashboard_url())
+
     cart = _get_or_create_cart(request)
 
     quantity_source = request.POST if request.method == "POST" else request.GET
@@ -104,7 +111,7 @@ def add_to_cart(request: HttpRequest, product_id: int) -> HttpResponse:
     return redirect("orders:cart")
 
 
-class CartView(LoginRequiredMixin, ListView):
+class CartView(CustomerRequiredMixin, ListView):
     """Display the items currently in the cart."""
 
     template_name = "orders/cart.html"
@@ -121,7 +128,7 @@ class CartView(LoginRequiredMixin, ListView):
         return context
 
 
-class CheckoutView(LoginRequiredMixin, FormView):
+class CheckoutView(CustomerRequiredMixin, FormView):
     """Finalize the order after capturing delivery preferences."""
 
     form_class = DeliveryScheduleForm
@@ -144,10 +151,23 @@ class CheckoutView(LoginRequiredMixin, FormView):
         self.cart.save()
         self.request.session.pop("cart_id", None)
         messages.success(self.request, _("Order placed successfully."))
+        AuditLog.record(
+            user=cast(User, self.request.user),
+            action=_("Checkout completed"),
+            instance=self.cart,
+            metadata={
+                "scheduled_date": (
+                    form.cleaned_data["scheduled_date"].isoformat()
+                    if form.cleaned_data["scheduled_date"]
+                    else None
+                ),
+                "total_amount": str(self.cart.total_amount),
+            },
+        )
         return super().form_valid(form)
 
 
-class OrderListView(LoginRequiredMixin, ListView):
+class OrderListView(CustomerRequiredMixin, ListView):
     """List orders for the logged-in customer."""
 
     template_name = "orders/order_list.html"
@@ -159,11 +179,12 @@ class OrderListView(LoginRequiredMixin, ListView):
         )
 
 
-class OrderDetailView(LoginRequiredMixin, DetailView):
+class OrderDetailView(CustomerRequiredMixin, OwnerRequiredMixin, DetailView):
     """Detailed view of a single order."""
 
     template_name = "orders/order_detail.html"
     context_object_name = "order"
+    owner_field = "customer"
 
     def get_queryset(self):  # type: ignore[override]
         return Order.objects.filter(customer=self.request.user)
@@ -191,14 +212,26 @@ class AdminOrderUpdateView(AdminRequiredMixin, UpdateView):
     form_class = AdminOrderUpdateForm
     template_name = "orders/admin_order_form.html"
     context_object_name = "order"
-    success_url = reverse_lazy("orders:admin-list")
+    success_url = reverse_lazy("portal-admin:orders-list")
 
     def get_queryset(self):  # type: ignore[override]
         return Order.objects.exclude(status=Order.Status.CART).select_related("customer")
 
     def form_valid(self, form):  # type: ignore[override]
         messages.success(self.request, _("Order updated."))
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        order = cast(Order, getattr(self, "object", form.instance))
+        actor = cast(User, self.request.user)
+        AuditLog.record(
+            user=actor,
+            action=_("Order status updated"),
+            instance=order,
+            metadata={
+                "status": order.status,
+                "payment_status": order.payment_status,
+            },
+        )
+        return response
 
     def get_context_data(self, **kwargs):  # type: ignore[override]
         context = super().get_context_data(**kwargs)

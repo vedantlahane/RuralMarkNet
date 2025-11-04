@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from accounts.models import User
 from deliveries.models import Delivery
-from orders.models import Order
+from orders.models import Order, OrderItem
 from products.models import Product
 
 
@@ -32,8 +32,10 @@ class DeliveryViewTests(TestCase):
             farmer=self.farmer,
         )
         order = Order.objects.create(customer=self.customer, status=Order.Status.PENDING)
-        order.items.create(product=product, quantity=1, price=20)
-        self.delivery = Delivery.objects.create(order=order, assigned_farmer=self.farmer)
+        OrderItem.objects.create(order=order, product=product, quantity=1, price=20)
+        self.delivery, _ = Delivery.objects.get_or_create(order=order)
+        self.delivery.assigned_farmer = self.farmer
+        self.delivery.save(update_fields=["assigned_farmer"])
 
     def test_delivery_list_requires_login(self) -> None:
         response = self.client.get(reverse("deliveries:list"))

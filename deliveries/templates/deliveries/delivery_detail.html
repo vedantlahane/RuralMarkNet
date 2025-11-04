@@ -38,7 +38,9 @@
     </div>
 
     {% if user.is_farmer and delivery.assigned_farmer_id == user.id %}
-        <a href="{% url 'deliveries:update' delivery.pk %}" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500 md:w-auto">{% trans "Update delivery" %}</a>
+        {% with update_route=update_url_name|default:'deliveries:update' %}
+            <a href="{% url update_route delivery.pk %}" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500 md:w-auto">{% trans "Update delivery" %}</a>
+        {% endwith %}
     {% endif %}
 </section>
 {% endblock %}
