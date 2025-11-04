@@ -42,7 +42,7 @@
                             {{ product.inventory }}
                         </td>
                         <td class="px-4 py-3 text-right">
-                            <a href="{% url 'products:admin-update' product.slug %}" class="inline-flex items-center gap-2 rounded-full border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50">{% trans "Edit" %}</a>
+                            <a href="{% url 'portal-admin:products-update' product.slug %}" class="inline-flex items-center gap-2 rounded-full border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50">{% trans "Edit" %}</a>
                         </td>
                     </tr>
                 {% empty %}
