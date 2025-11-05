@@ -1,7 +1,7 @@
 """Views for order placement and tracking."""
 from __future__ import annotations
 
-from typing import cast
+from typing import Any, cast
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,6 +16,9 @@ from django.views.generic.edit import FormView, UpdateView
 
 from accounts.mixins import AdminRequiredMixin, CustomerRequiredMixin, OwnerRequiredMixin
 from accounts.models import AuditLog, User
+
+from payments.models import Payment
+from payments.services import dispatch_payment
 
 from products.models import Product
 
@@ -142,7 +145,26 @@ class CheckoutView(CustomerRequiredMixin, FormView):
         if not self.cart.items.exists():  # type: ignore[attr-defined]
             messages.warning(request, _("Your cart is empty."))
             return redirect("products:list")
+        self._prepare_payment_choices()
+        allowed = getattr(self, "_allowed_payment_choices", [])
+        self._initial_provider = allowed[0][0] if allowed else None
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self) -> dict[str, Any]:  # type: ignore[override]
+        kwargs = super().get_form_kwargs()
+        kwargs["allowed_providers"] = getattr(self, "_allowed_payment_choices", Payment.Providers.choices)
+        if self._initial_provider is not None:
+            kwargs.setdefault("initial", {})["payment_provider"] = self._initial_provider
+        return kwargs
+
+    def get_context_data(self, **kwargs: object) -> dict[str, Any]:  # type: ignore[override]
+        context = super().get_context_data(**kwargs)
+        context["available_payment_methods"] = getattr(
+            self, "_allowed_payment_choices", Payment.Providers.choices
+        )
+        context["restricted_payment_methods"] = getattr(self, "_restricted_payment_choices", [])
+        context["using_default_payment_methods"] = getattr(self, "_using_default_payment_choices", False)
+        return context
 
     def form_valid(self, form: DeliveryScheduleForm) -> HttpResponse:
         self.cart.delivery_address = form.cleaned_data["delivery_address"]
@@ -152,7 +174,8 @@ class CheckoutView(CustomerRequiredMixin, FormView):
         self.cart.status = Order.Status.PENDING
         self.cart.save()
         self.request.session.pop("cart_id", None)
-        messages.success(self.request, _("Order placed successfully."))
+        provider = form.cleaned_data["payment_provider"]
+
         AuditLog.record(
             user=cast(User, self.request.user),
             action=_("Checkout completed"),
@@ -164,9 +187,76 @@ class CheckoutView(CustomerRequiredMixin, FormView):
                     else None
                 ),
                 "total_amount": str(self.cart.total_amount),
+                "payment_provider": provider,
             },
         )
-        return super().form_valid(form)
+
+        payment = Payment.objects.create(
+            order=self.cart,
+            provider=provider,
+            amount=self.cart.total_amount,
+            currency="INR",
+        )
+
+        if provider == Payment.Providers.COD:
+            payment.status = Payment.Status.INITIATED
+            payment.save(update_fields=["status"])
+
+            order_fields: list[str] = []
+            if self.cart.status == Order.Status.PENDING:
+                self.cart.status = Order.Status.CONFIRMED
+                order_fields.append("status")
+            if self.cart.payment_status != Order.PaymentStatus.UNPAID:
+                self.cart.payment_status = Order.PaymentStatus.UNPAID
+                order_fields.append("payment_status")
+            if order_fields:
+                self.cart.save(update_fields=order_fields)
+
+            AuditLog.record(
+                user=cast(User, self.request.user),
+                action=_("Cash on delivery selected"),
+                instance=self.cart,
+                metadata={"payment_id": payment.pk},
+            )
+            messages.success(
+                self.request,
+                _("Order confirmed. Cash on delivery has been recorded."),
+            )
+            return redirect("orders:detail", pk=self.cart.pk)
+
+        session = dispatch_payment(self.cart, provider)
+        messages.info(
+            self.request,
+            _("Redirecting to %(provider)s for secure payment...")
+            % {"provider": provider.capitalize()},
+        )
+        return redirect(session.redirect_url)
+
+    def _prepare_payment_choices(self) -> None:
+        all_choices = list(Payment.Providers.choices)
+        default_codes = {code for code, _ in all_choices}
+        allowed_codes = set(default_codes)
+        farmers: set[Any] = set()
+        for item in self.cart.items.select_related("product__farmer"):  # type: ignore[attr-defined]
+            farmer = getattr(item.product, "farmer", None)
+            if farmer is not None:
+                farmers.add(farmer)
+
+        for farmer in farmers:
+            if hasattr(farmer, "get_accepted_payment_methods"):
+                allowed_codes &= set(farmer.get_accepted_payment_methods())
+
+        restricted_choices = [(code, label) for code, label in all_choices if code not in allowed_codes]
+
+        if not allowed_codes:
+            self._using_default_payment_choices = True
+            self._allowed_payment_choices = all_choices
+            self._restricted_payment_choices = []
+        else:
+            self._using_default_payment_choices = False
+            filtered = [(code, label) for code, label in all_choices if code in allowed_codes]
+            self._allowed_payment_choices = filtered or all_choices
+            self._restricted_payment_choices = restricted_choices
 
 
 class OrderListView(CustomerRequiredMixin, ListView):
@@ -203,6 +293,9 @@ class OrderDetailView(CustomerRequiredMixin, OwnerRequiredMixin, DetailView):
         order = cast(Order, context["order"])
         cancellable_statuses = {Order.Status.PENDING, Order.Status.CONFIRMED}
         context["can_cancel"] = order.status in cancellable_statuses
+        payable_statuses = {Order.Status.PENDING, Order.Status.CONFIRMED}
+        outstanding_payment = {Order.PaymentStatus.UNPAID, Order.PaymentStatus.FAILED}
+        context["can_pay"] = order.status in payable_statuses and order.payment_status in outstanding_payment
         return context
 
 

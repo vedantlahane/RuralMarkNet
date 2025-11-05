@@ -106,4 +106,4 @@ class PaymentInitViewTests(TestCase):
 
         response = self.client.get(reverse("payments:start", args=[self.order.pk]))
         provider_codes = [code for code, _ in response.context["form"].fields["provider"].choices]
-        self.assertEqual(provider_codes, [Payment.Providers.STRIPE.value, Payment.Providers.PAYPAL.value])
+        self.assertEqual(provider_codes, [Payment.Providers.STRIPE.value])

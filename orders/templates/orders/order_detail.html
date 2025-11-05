@@ -49,6 +49,14 @@
                     <dd class="font-medium">{{ order.scheduled_window|default:_('To be confirmed') }}</dd>
                 </div>
             </dl>
+            {% if can_pay %}
+                <div class="mt-6 space-y-2">
+                    <a href="{% url 'payments:start' order.pk %}" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">
+                        {% trans "Complete payment" %}
+                    </a>
+                    <p class="text-xs text-slate-400">{% trans "Choose an available payment method or cash on delivery if offered." %}</p>
+                </div>
+            {% endif %}
         </div>
         <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
             <h2 class="text-lg font-semibold text-slate-900">{% trans "Delivery address" %}</h2>

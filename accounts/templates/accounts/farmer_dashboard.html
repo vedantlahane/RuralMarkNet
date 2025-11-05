@@ -58,6 +58,25 @@
             </p>
             <a href="{% url 'portal-farmer:products-create' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500">{% trans "Add new product" %}</a>
         </div>
+        <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-emerald-50">
+            <h3 class="text-lg font-semibold text-slate-900">{% trans "Payment preferences" %}</h3>
+            {% if using_all_payment_methods %}
+                <p class="mt-2 text-sm text-slate-500">{% trans "All supported payment methods are currently offered to customers." %}</p>
+            {% else %}
+                <p class="mt-2 text-sm text-slate-500">{% trans "Customers can pay using the methods listed below." %}</p>
+            {% endif %}
+            <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                {% for label in accepted_payment_methods %}
+                    <li class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-2">
+                        <span>{{ label }}</span>
+                        <span class="text-xs text-slate-400">{% trans "Enabled" %}</span>
+                    </li>
+                {% empty %}
+                    <li class="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{% trans "No payment methods selected yet." %}</li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'accounts:profile' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-500">{% trans "Update payment options" %}</a>
+        </div>
     </div>
 </section>
 {% endblock %}

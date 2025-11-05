@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from accounts.models import User
 from orders.models import Order
+from payments.models import Payment
 from products.models import Product
 
 
@@ -35,7 +36,7 @@ class CheckoutFlowTests(TestCase):
 
     def test_checkout_places_order(self) -> None:
         order = Order.objects.create(customer=self.customer)
-        order.items.create(product=self.product, quantity=2, price=50)
+        order.items.create(product=self.product, quantity=2, price=50)  # type: ignore[attr-defined]
         session = self.client.session
         session["cart_id"] = order.pk
         session.save()
@@ -48,10 +49,14 @@ class CheckoutFlowTests(TestCase):
                 "scheduled_date": date.today() + timedelta(days=1),
                 "scheduled_window": "morning",
                 "notes": "Leave at the doorstep",
+                "payment_provider": Payment.Providers.COD.value,
             },
         )
-        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("orders:detail", args=[order.pk]))
         order.refresh_from_db()
-        self.assertEqual(order.status, Order.Status.PENDING)
-        self.assertTrue(hasattr(order, "delivery"))
+        self.assertEqual(order.status, Order.Status.CONFIRMED)
+        self.assertEqual(order.payment_status, Order.PaymentStatus.UNPAID)
         self.assertEqual(order.delivery_address, "123 Market Street")
+        payment = Payment.objects.get(order=order)
+        self.assertEqual(payment.provider, Payment.Providers.COD.value)
+        self.assertEqual(payment.status, Payment.Status.INITIATED)

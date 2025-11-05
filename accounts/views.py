@@ -276,6 +276,10 @@ class DashboardFarmerView(FarmerRequiredMixin, DashboardBaseView):
         ]
 
         low_stock_alerts = list(low_stock_qs)
+        payment_choices = list(Payment.Providers.choices)
+        accepted_codes = set(user.get_accepted_payment_methods())
+        accepted_labels = [label for code, label in payment_choices if code in accepted_codes]
+        using_all_methods = len(accepted_labels) == len(payment_choices)
 
         return {
             "orders": recent_orders,
@@ -314,6 +318,9 @@ class DashboardFarmerView(FarmerRequiredMixin, DashboardBaseView):
             "products_cta_label": _("Manage products"),
             "pending_deliveries": pending_delivery_count,
             "low_stock_count": len(low_stock_alerts),
+            "accepted_payment_methods": accepted_labels,
+            "available_payment_methods": payment_choices,
+            "using_all_payment_methods": using_all_methods,
         }
 
 
