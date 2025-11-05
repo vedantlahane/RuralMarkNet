@@ -1,7 +1,0 @@
-Django
-Pillow
-stripe
-django-tailwind
-paypalrestsdk
-redis
-celery
