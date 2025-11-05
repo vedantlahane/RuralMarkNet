@@ -1844,6 +1844,11 @@
     }
   }
   @media (width >= 40rem) {
+    .sm\:w-auto {
+      width: auto;
+    }
+  }
+  @media (width >= 40rem) {
     .sm\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1864,6 +1869,11 @@
     }
   }
   @media (width >= 40rem) {
+    .sm\:items-end {
+      align-items: flex-end;
+    }
+  }
+  @media (width >= 40rem) {
     .sm\:justify-between {
       justify-content: space-between;
     }
@@ -1876,6 +1886,11 @@
   @media (width >= 40rem) {
     .sm\:px-6 {
       padding-inline: calc(var(--spacing) * 6);
+    }
+  }
+  @media (width >= 40rem) {
+    .sm\:text-right {
+      text-align: right;
     }
   }
   @media (width >= 48rem) {

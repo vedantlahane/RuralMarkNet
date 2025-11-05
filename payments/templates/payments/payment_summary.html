@@ -15,6 +15,17 @@
             <p class="font-semibold">{% blocktrans %}Order #{{ order.pk }}{% endblocktrans %}</p>
             <p class="mt-1 text-lg font-semibold">₹ {{ order.total_amount }}</p>
         </div>
+        {% if restricted_methods %}
+            <div class="mb-6 rounded-2xl bg-amber-50 px-5 py-4 text-sm text-amber-900">
+                <p class="font-semibold">{% trans "Some payment options are unavailable" %}</p>
+                <p class="mt-1">
+                    {% trans "One or more farmers in this order do not accept:" %}
+                    {% for code, label in restricted_methods %}
+                        <span class="font-semibold">{{ label }}</span>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        {% endif %}
         <form method="post" class="space-y-6">
             {% csrf_token %}
             {% if form.non_field_errors %}

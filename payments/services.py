@@ -38,4 +38,6 @@ def dispatch_payment(order: Order, provider: str) -> PaymentSession:
         return create_stripe_session(order)
     if provider == Payment.Providers.PAYPAL:
         return create_paypal_order(order)
+    if provider == Payment.Providers.COD:
+        raise ValueError("Cash on delivery does not require gateway dispatch")
     raise ValueError("Unsupported provider")

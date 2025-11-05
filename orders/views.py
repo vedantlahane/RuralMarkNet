@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
+from django.views.generic.base import View
+from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormView, UpdateView
 
 from accounts.mixins import AdminRequiredMixin, CustomerRequiredMixin, OwnerRequiredMixin
@@ -174,8 +176,11 @@ class OrderListView(CustomerRequiredMixin, ListView):
     context_object_name = "orders"
 
     def get_queryset(self):  # type: ignore[override]
-        return Order.objects.filter(customer=self.request.user).exclude(
-            status=Order.Status.CART
+        return (
+            Order.objects.filter(customer=self.request.user)
+            .exclude(status=Order.Status.CART)
+            .prefetch_related("items__product")
+            .order_by("-created_at")
         )
 
 
@@ -187,7 +192,65 @@ class OrderDetailView(CustomerRequiredMixin, OwnerRequiredMixin, DetailView):
     owner_field = "customer"
 
     def get_queryset(self):  # type: ignore[override]
-        return Order.objects.filter(customer=self.request.user)
+        return (
+            Order.objects.filter(customer=self.request.user)
+            .exclude(status=Order.Status.CART)
+            .prefetch_related("items__product")
+        )
+
+    def get_context_data(self, **kwargs: object) -> dict[str, object]:  # type: ignore[override]
+        context = super().get_context_data(**kwargs)
+        order = cast(Order, context["order"])
+        cancellable_statuses = {Order.Status.PENDING, Order.Status.CONFIRMED}
+        context["can_cancel"] = order.status in cancellable_statuses
+        return context
+
+
+class OrderCancelView(CustomerRequiredMixin, OwnerRequiredMixin, SingleObjectMixin, View):
+    """Allow customers to cancel their own orders before fulfilment."""
+
+    http_method_names = ["post"]
+    owner_field = "customer"
+    model = Order
+
+    def get_queryset(self):  # type: ignore[override]
+        return (
+            Order.objects.filter(customer=self.request.user)
+            .exclude(status=Order.Status.CART)
+            .prefetch_related("items__product")
+        )
+
+    def post(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponse:
+        order = self.get_object()
+
+        if order.status in [Order.Status.DELIVERED, Order.Status.CANCELLED]:
+            messages.info(request, _("This order can no longer be cancelled."))
+            return redirect("orders:detail", order.pk)
+
+        if order.status == Order.Status.SHIPPED:
+            messages.info(request, _("Shipped orders require support assistance to cancel."))
+            return redirect("orders:detail", order.pk)
+
+        previous_status = order.status
+        order.status = Order.Status.CANCELLED
+        order.save(update_fields=["status"])
+
+        AuditLog.record(
+            user=cast(User, request.user),
+            action=_("Order cancelled by customer"),
+            instance=order,
+            metadata={
+                "previous_status": previous_status,
+                "new_status": order.status,
+                "total_amount": str(order.total_amount),
+            },
+        )
+
+        messages.success(
+            request,
+            _("Your order has been cancelled. We have notified the fulfilment team."),
+        )
+        return redirect("orders:list")
 
 
 class AdminOrderListView(AdminRequiredMixin, ListView):

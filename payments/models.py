@@ -13,6 +13,7 @@ class Payment(models.Model):
     class Providers(models.TextChoices):
         STRIPE = "stripe", _("Stripe")
         PAYPAL = "paypal", _("PayPal")
+        COD = "cod", _("Cash on delivery")
 
     class Status(models.TextChoices):
         INITIATED = "initiated", _("Initiated")
@@ -35,7 +36,10 @@ class Payment(models.Model):
         indexes = [models.Index(fields=["provider", "transaction_id"])]
 
     def __str__(self) -> str:
-        return f"Payment {self.pk} for order #{self.order_id}"
+        order_reference = getattr(self, "order_id", None)
+        if order_reference is None:
+            order_reference = getattr(self.order, "pk", "?")
+        return f"Payment {self.pk} for order #{order_reference}"
 
     def mark_successful(self, transaction_id: str, payload: dict[str, object]) -> None:
         """Mark the payment as successful and update related order."""

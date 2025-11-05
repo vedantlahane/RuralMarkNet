@@ -1,10 +1,16 @@
 """Models for user accounts."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, cast
+
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+if TYPE_CHECKING:  # pragma: no cover - hints for type checkers only
+    from payments.models import Payment as PaymentModel
 
 
 class User(AbstractUser):
@@ -39,6 +45,12 @@ class User(AbstractUser):
         help_text=_("Preferred language for the interface."),
     )
     address = models.TextField(blank=True)
+    accepted_payment_methods = models.JSONField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text=_("Payment method codes this farmer chooses to accept."),
+    )
 
     @property
     def is_farmer(self) -> bool:
@@ -62,6 +74,28 @@ class User(AbstractUser):
         if self.is_farmer:
             return "portal-farmer:dashboard"
         return "portal-customer:dashboard"
+
+    def get_accepted_payment_methods(self) -> list[str]:
+        """Return the allowed payment provider codes for this user."""
+
+        payment_model = apps.get_model("payments", "Payment")
+        if payment_model is None:
+            return []
+        payment_model = cast("type[PaymentModel]", payment_model)
+        valid_methods = {code for code, _ in payment_model.Providers.choices}
+        if not valid_methods:
+            return []
+
+        configured = self.accepted_payment_methods
+        if isinstance(configured, list) and configured:
+            configured_list = cast(list[str], configured)
+            return [code for code in configured_list if code in valid_methods]
+        return list(valid_methods)
+
+    def supports_payment_method(self, method: str) -> bool:
+        """Return True when the given provider code is permitted."""
+
+        return method in self.get_accepted_payment_methods()
 
 
 class AuditLog(models.Model):
