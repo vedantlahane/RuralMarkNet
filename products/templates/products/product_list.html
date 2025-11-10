@@ -4,53 +4,53 @@
 {% block title %}{% trans "Products" %}{% endblock %}
 
 {% block content %}
-<section class="space-y-10">
-    <div class="overflow-hidden rounded-3xl bg-linear-to-r from-emerald-500 via-emerald-600 to-emerald-500 p-8 text-white shadow-xl">
+<section class="space-y-8 sm:space-y-10">
+    <div class="overflow-hidden rounded-3xl bg-linear-to-r from-emerald-500 via-emerald-600 to-emerald-500 p-6 text-white shadow-xl sm:p-8">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div class="space-y-4">
-                <p class="text-sm font-semibold uppercase tracking-wide text-white/80">{% trans "Marketplace" %}</p>
-                <h1 class="text-3xl font-semibold md:text-4xl">{% trans "Available Produce" %}</h1>
-                <p class="max-w-2xl text-white/90">{% trans "Discover fresh produce from local farmers and fine-tune your search with filters below." %}</p>
+            <div class="space-y-3 sm:space-y-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-white/80 sm:text-sm">{% trans "Marketplace" %}</p>
+                <h1 class="text-2xl font-semibold sm:text-3xl md:text-4xl">{% trans "Available Produce" %}</h1>
+                <p class="max-w-2xl text-sm text-white/90 sm:text-base">{% trans "Discover fresh produce from local farmers and fine-tune your search with filters below." %}</p>
             </div>
-            <div class="grid w-full max-w-xs grid-cols-2 gap-4 text-sm md:grid-cols-1">
+            <div class="grid w-full max-w-sm grid-cols-2 gap-3 text-xs sm:text-sm md:max-w-xs md:grid-cols-1">
                 <div class="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
-                    <p class="text-xs uppercase tracking-wide text-white/70">{% trans "Listings" %}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ products|length }}</p>
+                    <p class="text-[11px] uppercase tracking-wide text-white/70 sm:text-xs">{% trans "Listings" %}</p>
+                    <p class="mt-2 text-xl font-semibold sm:text-2xl">{{ products|length }}</p>
                 </div>
                 <div class="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
-                    <p class="text-xs uppercase tracking-wide text-white/70">{% trans "Categories" %}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ product_categories|length }}</p>
+                    <p class="text-[11px] uppercase tracking-wide text-white/70 sm:text-xs">{% trans "Categories" %}</p>
+                    <p class="mt-2 text-xl font-semibold sm:text-2xl">{{ product_categories|length }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <form method="get" class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
-            <input type="text" name="search" value="{{ request.GET.search|default_if_none:'' }}" placeholder="{% trans "Search produce" %}" class="col-span-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 md:col-span-2">
-            <select name="category" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+    <form method="get" class="rounded-3xl bg-white p-5 shadow-lg ring-1 ring-emerald-50 sm:p-6">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
+            <input type="text" name="search" value="{{ request.GET.search|default_if_none:'' }}" placeholder="{% trans "Search produce" %}" class="col-span-1 rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 sm:col-span-2">
+            <select name="category" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
                 <option value="">{% trans "All categories" %}</option>
                 {% for value, label in product_categories %}
                     <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
-            <input type="number" name="min_price" step="0.01" value="{{ request.GET.min_price|default_if_none:'' }}" placeholder="{% trans "Min price" %}" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
-            <input type="number" name="max_price" step="0.01" value="{{ request.GET.max_price|default_if_none:'' }}" placeholder="{% trans "Max price" %}" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
-            <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 shadow-sm focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200">
+            <input type="number" name="min_price" step="0.01" value="{{ request.GET.min_price|default_if_none:'' }}" placeholder="{% trans "Min price" %}" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+            <input type="number" name="max_price" step="0.01" value="{{ request.GET.max_price|default_if_none:'' }}" placeholder="{% trans "Max price" %}" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+            <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-200">
                 <span>{% trans "In stock" %}</span>
                 <input type="checkbox" name="available" value="true" class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" {% if request.GET.available %}checked{% endif %}>
             </label>
         </div>
-        <div class="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <button type="submit" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Apply filters" %}</button>
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500 sm:w-auto">{% trans "Apply filters" %}</button>
             <a href="{% url 'products:list' %}" class="text-sm font-medium text-slate-500 hover:text-slate-700">{% trans "Reset" %}</a>
         </div>
     </form>
 
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {% for product in products %}
             <article class="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-emerald-50 transition hover:-translate-y-1 hover:shadow-xl">
-                <div class="relative h-48 w-full overflow-hidden bg-emerald-100">
+                <div class="relative h-44 w-full overflow-hidden bg-emerald-100 sm:h-48">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                     {% else %}
@@ -60,26 +60,26 @@
                         {{ product.get_category_display }}
                     </span>
                 </div>
-                <div class="flex flex-1 flex-col gap-4 p-6">
+                <div class="flex flex-1 flex-col gap-4 p-5 sm:p-6">
                     <div>
-                        <h2 class="text-xl font-semibold text-slate-900">
+                        <h2 class="text-lg font-semibold text-slate-900 sm:text-xl">
                             <a href="{{ product.get_absolute_url }}" class="hover:text-emerald-600">{{ product.name }}</a>
                         </h2>
-                        <p class="mt-1 text-sm text-slate-500">{{ product.location }}</p>
+                        <p class="mt-1 text-xs text-slate-500 sm:text-sm">{{ product.location }}</p>
                     </div>
                     <div>
-                        <p class="text-2xl font-semibold text-emerald-600">₹ {{ product.price }} <span class="text-sm font-medium text-slate-500">/ {{ product.unit_quantity|floatformat:2 }} {{ product.get_unit_display }}</span></p>
-                        <p class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{{ product.get_quality_grade_display }} · {{ product.get_farming_practice_display }}</p>
+                        <p class="text-xl font-semibold text-emerald-600 sm:text-2xl">₹ {{ product.price }} <span class="text-xs font-medium text-slate-500 sm:text-sm">/ {{ product.unit_quantity|floatformat:2 }} {{ product.get_unit_display }}</span></p>
+                        <p class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700 sm:text-xs">{{ product.get_quality_grade_display }} · {{ product.get_farming_practice_display }}</p>
                     </div>
-                    <div class="mt-auto flex items-center justify-between text-sm text-slate-500">
+                    <div class="mt-auto flex items-center justify-between text-xs text-slate-500 sm:text-sm">
                         <p>{% blocktrans with inventory=product.inventory %}Inventory: {{ inventory }}{% endblocktrans %}</p>
                         {% if product.available %}
-                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">● {% trans "Available" %}</span>
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-600">● {% trans "Available" %}</span>
                         {% else %}
-                            <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">● {% trans "Out of stock" %}</span>
+                            <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-semibold text-rose-600">● {% trans "Out of stock" %}</span>
                         {% endif %}
                     </div>
-                    <a href="{{ product.get_absolute_url }}" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500">{% trans "View details" %}</a>
+                    <a href="{{ product.get_absolute_url }}" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 sm:w-auto">{% trans "View details" %}</a>
                 </div>
             </article>
         {% empty %}

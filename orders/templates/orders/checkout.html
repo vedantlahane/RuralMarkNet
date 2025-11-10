@@ -5,10 +5,10 @@
 
 {% block content %}
 <div class="mx-auto max-w-3xl">
-    <div class="rounded-3xl bg-white p-8 shadow-lg ring-1 ring-emerald-50">
+    <div class="rounded-3xl bg-white p-5 shadow-lg ring-1 ring-emerald-50 sm:p-6 md:p-8">
         <div class="mb-8 space-y-2">
-            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Checkout" %}</p>
-            <h1 class="text-3xl font-semibold text-slate-900">{% trans "Delivery details" %}</h1>
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 sm:text-sm">{% trans "Checkout" %}</p>
+            <h1 class="text-2xl font-semibold text-slate-900 sm:text-3xl">{% trans "Delivery details" %}</h1>
             <p class="text-sm text-slate-500">{% trans "Confirm your address and preferred delivery window so we can coordinate logistics." %}</p>
         </div>
         {% if restricted_payment_methods %}
@@ -27,7 +27,7 @@
                 <p class="mt-1">{% trans "You can choose any supported provider during checkout." %}</p>
             </div>
         {% endif %}
-        <form method="post" class="space-y-6">
+        <form method="post" class="space-y-5 sm:space-y-6">
             {% csrf_token %}
             {% if form.non_field_errors %}
                 <div class="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -42,7 +42,7 @@
                         <p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>
                     {% endif %}
                     {% if field.errors %}
-                        <ul class="mt-2 space-y-1 text-sm text-rose-600">
+                        <ul class="mt-2 space-y-1 text-xs text-rose-600 sm:text-sm">
                             {% for error in field.errors %}
                                 <li>{{ error }}</li>
                             {% endfor %}
@@ -50,9 +50,9 @@
                     {% endif %}
                 </div>
             {% endfor %}
-            <div class="flex items-center justify-end gap-3">
-                <a href="{% url 'orders:cart' %}" class="text-sm font-medium text-slate-500 hover:text-slate-700">{% trans "Back to cart" %}</a>
-                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Place order" %}</button>
+            <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{% url 'orders:cart' %}" class="inline-flex items-center justify-center rounded-full border border-emerald-200 px-5 py-2 text-sm font-medium text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 sm:w-auto">{% trans "Back to cart" %}</a>
+                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500 sm:w-auto">{% trans "Place order" %}</button>
             </div>
         </form>
     </div>

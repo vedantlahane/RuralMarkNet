@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n l10n %}
 
 {% block title %}{% trans "Deliveries" %}{% endblock %}
 
@@ -14,14 +14,73 @@
     {% if deliveries %}
         <div class="grid gap-6 md:grid-cols-2">
             {% for delivery in deliveries %}
-                <article class="flex h-full flex-col gap-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-slate-900">{% blocktrans %}Order #{{ delivery.order.pk }}{% endblocktrans %}</h2>
-                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">{{ delivery.get_status_display }}</span>
+                <article class="flex h-full flex-col gap-5 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-slate-900">{% blocktrans %}Order #{{ delivery.order_id }}{% endblocktrans %}</h2>
+                            <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                {{ delivery.order.get_status_display }} · {{ delivery.order.get_payment_status_display }}
+                            </p>
+                        </div>
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase text-emerald-600">{{ delivery.get_status_display }}</span>
                     </div>
-                    <p class="text-sm text-slate-500">{% trans "Last updated" %}: {{ delivery.updated_at|date:"SHORT_DATE_FORMAT" }}</p>
-                    <div class="flex items-center justify-end">
-                        <a href="{% url detail_url_name delivery.pk %}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-500">{% trans "View details" %}</a>
+
+                    <dl class="grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
+                        <div>
+                            <dt class="font-semibold text-slate-700">{% trans "Customer" %}</dt>
+                            <dd class="mt-1 text-slate-500">
+                                {{ delivery.order.customer.get_full_name|default:delivery.order.customer.username }}
+                            </dd>
+                        </div>
+
+                        {% if delivery.assigned_farmer %}
+                            <div>
+                                <dt class="font-semibold text-slate-700">{% trans "Assigned farmer" %}</dt>
+                                <dd class="mt-1 text-slate-500">
+                                    {{ delivery.assigned_farmer.get_full_name|default:delivery.assigned_farmer.username }}
+                                </dd>
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <dt class="font-semibold text-slate-700">{% trans "Schedule" %}</dt>
+                            <dd class="mt-1 text-slate-500">
+                                {% if delivery.order.scheduled_date %}
+                                    {{ delivery.order.scheduled_date|date:"SHORT_DATE_FORMAT" }}
+                                    {% if delivery.order.scheduled_window %}
+                                        · {{ delivery.order.scheduled_window }}
+                                    {% endif %}
+                                {% else %}
+                                    {% trans "Not set" %}
+                                {% endif %}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="font-semibold text-slate-700">{% trans "Order summary" %}</dt>
+                            <dd class="mt-1 text-slate-500">
+                                {% with items=delivery.order.items.all %}
+                                    {% with item_count=items|length %}
+                                        {% if item_count %}
+                                            {% with total=delivery.order.total_amount|localize %}
+                                                {% blocktrans count item_count=item_count with total=total %}
+                                                    {{ item_count }} item · Total {{ total }}
+                                                {% plural %}
+                                                    {{ item_count }} items · Total {{ total }}
+                                                {% endblocktrans %}
+                                            {% endwith %}
+                                        {% else %}
+                                            {% trans "No items" %}
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <div class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-400">{% trans "Last updated" %}: {{ delivery.updated_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+                        <a href="{% url detail_url_name delivery.pk %}" class="inline-flex items-center gap-2 rounded-full border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:border-emerald-400 hover:text-emerald-500">{% trans "View details" %}</a>
                     </div>
                 </article>
             {% endfor %}

@@ -36,7 +36,11 @@ class AdminDeliveryListView(AdminRequiredMixin, BaseDeliveryListView):
     detail_url_name = "portal-admin:deliveries-detail"
 
     def get_queryset(self):  # type: ignore[override]
-        return Delivery.objects.select_related("order", "order__customer", "assigned_farmer").order_by("-updated_at")
+        return (
+            Delivery.objects.select_related("order", "order__customer", "assigned_farmer")
+            .prefetch_related("order__items__product")
+            .order_by("-updated_at")
+        )
 
 
 class AdminDeliveryDetailView(AdminRequiredMixin, DetailView):
@@ -46,7 +50,10 @@ class AdminDeliveryDetailView(AdminRequiredMixin, DetailView):
     context_object_name = "delivery"
 
     def get_queryset(self):  # type: ignore[override]
-        return Delivery.objects.select_related("order", "order__customer", "assigned_farmer")
+        return (
+            Delivery.objects.select_related("order", "order__customer", "assigned_farmer")
+            .prefetch_related("order__items__product")
+        )
 
 
 class FarmerDeliveryListView(FarmerRequiredMixin, BaseDeliveryListView):
@@ -57,6 +64,7 @@ class FarmerDeliveryListView(FarmerRequiredMixin, BaseDeliveryListView):
     def get_queryset(self):  # type: ignore[override]
         return (
             Delivery.objects.select_related("order", "order__customer")
+            .prefetch_related("order__items__product")
             .filter(assigned_farmer=self.request.user)
             .order_by("-updated_at")
         )
@@ -70,7 +78,10 @@ class FarmerDeliveryDetailView(FarmerRequiredMixin, OwnerRequiredMixin, DetailVi
     owner_field = "assigned_farmer"
 
     def get_queryset(self):  # type: ignore[override]
-        return Delivery.objects.select_related("order", "order__customer")
+        return (
+            Delivery.objects.select_related("order", "order__customer")
+            .prefetch_related("order__items__product")
+        )
 
     def get_permission_denied_redirect(self) -> str:  # type: ignore[override]
         return reverse_lazy("portal-farmer:deliveries-list")
@@ -110,6 +121,7 @@ class CustomerDeliveryListView(CustomerRequiredMixin, BaseDeliveryListView):
     def get_queryset(self):  # type: ignore[override]
         return (
             Delivery.objects.select_related("order", "assigned_farmer")
+            .prefetch_related("order__items__product")
             .filter(order__customer=self.request.user)
             .exclude(status=Delivery.Status.CANCELLED)
             .order_by("-updated_at")
@@ -123,6 +135,8 @@ class CustomerDeliveryDetailView(CustomerRequiredMixin, DetailView):
     context_object_name = "delivery"
 
     def get_queryset(self):  # type: ignore[override]
-        return Delivery.objects.select_related("order", "assigned_farmer").filter(
-            order__customer=self.request.user
+        return (
+            Delivery.objects.select_related("order", "assigned_farmer")
+            .prefetch_related("order__items__product")
+            .filter(order__customer=self.request.user)
         )

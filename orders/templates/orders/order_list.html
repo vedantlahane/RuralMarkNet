@@ -4,28 +4,28 @@
 {% block title %}{% trans "My orders" %}{% endblock %}
 
 {% block content %}
-<section class="space-y-8">
-    <div class="rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
-        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "Order history" %}</p>
-        <h1 class="text-3xl font-semibold text-slate-900">{% trans "Recent orders" %}</h1>
+<section class="space-y-6 sm:space-y-8">
+    <div class="rounded-3xl bg-white p-5 shadow-lg ring-1 ring-emerald-50 sm:p-6">
+        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 sm:text-sm">{% trans "Order history" %}</p>
+        <h1 class="text-2xl font-semibold text-slate-900 sm:text-3xl">{% trans "Recent orders" %}</h1>
         <p class="mt-2 text-sm text-slate-500">{% trans "Track progress and revisit order details whenever you need." %}</p>
     </div>
 
     {% if orders %}
-        <div class="grid gap-6 md:grid-cols-2">
+        <div class="grid gap-5 sm:grid-cols-2">
             {% for order in orders %}
-                <article class="flex h-full flex-col gap-4 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-emerald-50">
+                <article class="flex h-full flex-col gap-4 rounded-3xl bg-white p-5 shadow-lg ring-1 ring-emerald-50 sm:p-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-slate-900">#{{ order.pk }}</h2>
-                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">{{ order.get_status_display }}</span>
+                        <h2 class="text-lg font-semibold text-slate-900 sm:text-xl">#{{ order.pk }}</h2>
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-600">{{ order.get_status_display }}</span>
                     </div>
-                    <p class="text-sm text-slate-500">
+                    <p class="text-xs text-slate-500 sm:text-sm">
                         {{ order.created_at|date:"SHORT_DATE_FORMAT" }}
                         {% if order.scheduled_date %}
                             · {% trans "Scheduled" %}: {{ order.scheduled_date|date:"SHORT_DATE_FORMAT" }}
                         {% endif %}
                     </p>
-                    <ul class="space-y-1 text-sm text-slate-600">
+                    <ul class="space-y-1 text-xs text-slate-600 sm:text-sm">
                         {% for item in order.items.all %}
                             <li class="flex items-center justify-between">
                                 <span>{{ item.product.name }}</span>
@@ -36,8 +36,8 @@
                         {% endfor %}
                     </ul>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-slate-500">{% trans "Total" %}</span>
-                        <span class="text-lg font-semibold text-emerald-600">₹ {{ order.total_amount }}</span>
+                        <span class="text-xs text-slate-500 sm:text-sm">{% trans "Total" %}</span>
+                        <span class="text-base font-semibold text-emerald-600 sm:text-lg">₹ {{ order.total_amount }}</span>
                     </div>
                     <div class="flex items-center justify-end">
                         <a href="{% url 'orders:detail' order.pk %}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-500">{% trans "View details" %}</a>
@@ -46,11 +46,11 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-white p-12 text-center text-slate-500">
-            <p class="text-4xl">📦</p>
-            <h2 class="mt-4 text-2xl font-semibold text-slate-700">{% trans "You have not placed any orders yet" %}</h2>
+        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-white p-10 text-center text-slate-500 sm:p-12">
+            <p class="text-3xl sm:text-4xl">📦</p>
+            <h2 class="mt-4 text-xl font-semibold text-slate-700 sm:text-2xl">{% trans "You have not placed any orders yet" %}</h2>
             <p class="mt-2 text-sm">{% trans "Browse products to start your first order." %}</p>
-            <a href="{% url 'products:list' %}" class="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500">{% trans "Shop now" %}</a>
+            <a href="{% url 'products:list' %}" class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 sm:w-auto">{% trans "Shop now" %}</a>
         </div>
     {% endif %}
 </section>
