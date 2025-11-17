@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from urllib.parse import urlsplit
 
 from django.test import TestCase
 from django.urls import reverse
@@ -75,13 +76,21 @@ class EmailVerificationViewTests(TestCase):
 
     def test_resend_creates_fresh_token(self) -> None:
         old_token = EmailVerificationToken.issue_for_user(self.user, expires_in=timedelta(minutes=5))
+        user_before = User.objects.get(pk=self.user.pk)
+        self.assertFalse(user_before.email_verified)
+        matches = list(
+            User.objects.filter(email__iexact=self.user.email).values_list("pk", "email_verified")
+        )
+        self.assertEqual(matches, [(self.user.pk, False)])
         response = self.client.post(
             reverse("accounts:verify-email-resend"),
             data={"email": self.user.email},
         )
         self.assertEqual(response.status_code, 302)
         pending_base = reverse("accounts:verify-email-pending")
-        self.assertTrue(response.headers["Location"].startswith(pending_base))
+        redirect_bits = urlsplit(response.headers["Location"])
+        self.assertEqual(redirect_bits.path, pending_base)
+        self.assertEqual(redirect_bits.query, f"email={self.user.email}")
 
         latest = EmailVerificationToken.objects.filter(user=self.user).first()
         self.assertIsNotNone(latest)

@@ -581,7 +581,7 @@ def resend_verification_email(request: HttpRequest) -> HttpResponse:
 
     if user.email_verified:
         messages.info(request, _("This email is already verified. You can sign in now."))
-        return redirect("accounts:login")
+        return redirect(redirect_url)
 
     EmailVerificationService.send_verification(user, request)
     messages.success(request, _("A fresh verification link is on the way."))

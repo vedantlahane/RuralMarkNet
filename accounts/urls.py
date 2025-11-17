@@ -21,8 +21,8 @@ app_name = "accounts"
 urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
     path("verify/pending/", VerificationPendingView.as_view(), name="verify-email-pending"),
-    path("verify/<str:token>/", verify_email, name="verify-email"),
     path("verify/resend/", resend_verification_email, name="verify-email-resend"),
+    path("verify/<str:token>/", verify_email, name="verify-email"),
     path("login/", RuralLoginView.as_view(), name="login"),
     path("logout/", RuralLogoutView.as_view(next_page="products:home"), name="logout"),
     path("profile/", update_profile, name="profile"),
