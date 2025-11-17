@@ -133,3 +133,15 @@ class LoginForm(StyledFormMixin, AuthenticationForm):
         initial=True,
         label=_("Keep me signed in"),
     )
+
+    def confirm_login_allowed(self, user):  # type: ignore[override]
+        if not getattr(user, "email_verified", True):
+            raise forms.ValidationError(
+                _("Please verify your email before signing in."),
+                code="inactive",
+            )
+        if not user.is_active:
+            raise forms.ValidationError(
+                _("This account is inactive."),
+                code="inactive",
+            )

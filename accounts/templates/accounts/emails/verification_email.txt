@@ -1,0 +1,11 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans with name=user.get_full_name|default:user.username %}Hello {{ name }},{% endblocktrans %}
+
+{% blocktrans with hours=hours_valid %}Please confirm your RuralMarkNet email by opening the link below within {{ hours }} hours:{% endblocktrans %}
+{{ verification_url }}
+
+{% if is_debug %}{% trans "Developing locally? This message is printed to the Django console email backend so you can copy the link directly." %}
+
+{% endif %}{% trans "If you didn't sign up for RuralMarkNet, you can safely ignore this email." %}
+{% endautoescape %}

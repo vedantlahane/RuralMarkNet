@@ -4,6 +4,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import cast
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -16,11 +17,13 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils import formats
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, ListView, TemplateView
 
 from .forms import LoginForm, ProfileForm, UserRegistrationForm
 from .mixins import AdminRequiredMixin, CustomerRequiredMixin, FarmerRequiredMixin
-from .models import AuditLog, User
+from .models import AuditLog, EmailVerificationToken, User
+from .services import EmailVerificationService
 from deliveries.models import Delivery
 from orders.models import Order, OrderItem
 from products.models import Product
@@ -32,14 +35,30 @@ class SignUpView(CreateView):
 
     template_name = "accounts/signup.html"
     form_class = UserRegistrationForm
-    success_url = reverse_lazy("accounts:switch-dashboard")
+    success_url = reverse_lazy("accounts:verify-email-pending")
 
     def form_valid(self, form: UserRegistrationForm) -> HttpResponse:
-        user: User = form.save()
+        user: User = form.save(commit=False)
+        user.is_active = False
+        user.email_verified = False
+        user.save()
+        form.save_m2m()
         self.object = user
-        login(self.request, user)
-        messages.success(self.request, _("Welcome to RuralMarkNet!"))
+        EmailVerificationService.send_verification(user, self.request)
+        messages.info(
+            self.request,
+            _(
+                "We've sent a verification link. For local testing, copy the URL from the server console."
+            ),
+        )
         return redirect(self.get_success_url())
+
+    def get_success_url(self) -> str:  # type: ignore[override]
+        base_url = super().get_success_url()
+        email = getattr(self.object, "email", "") if getattr(self, "object", None) else ""
+        if email:
+            return f"{base_url}?email={email}"
+        return base_url
 
 
 class RuralLoginView(LoginView):
@@ -57,6 +76,18 @@ class RuralLogoutView(DjangoLogoutView):
     def get(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponse:
         # Delegate to the built-in POST handler so session cleanup stays consistent.
         return super().post(request, *args, **kwargs)
+
+
+class VerificationPendingView(TemplateView):
+    """Simple landing page reminding the user to verify their email."""
+
+    template_name = "accounts/verification_pending.html"
+
+    def get_context_data(self, **kwargs: object) -> dict[str, object]:
+        context = super().get_context_data(**kwargs)
+        email = self.request.GET.get("email") if self.request else ""
+        context["email"] = email or ""
+        return context
 
 
 class CurrencyFormattingMixin:
@@ -492,6 +523,69 @@ class AdminFinancialReportView(AdminRequiredMixin, CurrencyFormattingMixin, Temp
         context["recent_logs"] = AuditLog.objects.select_related("user")[:8]
         context["report_generated_at"] = now
         return context
+
+
+def _default_auth_backend() -> str:
+    backends = getattr(settings, "AUTHENTICATION_BACKENDS", [])
+    return backends[0] if backends else "django.contrib.auth.backends.ModelBackend"
+
+
+def verify_email(request: HttpRequest, token: str) -> HttpResponse:
+    """Redeem a verification token and activate the matching user."""
+
+    try:
+        record = EmailVerificationToken.objects.select_related("user").get(token=token)
+    except EmailVerificationToken.DoesNotExist:
+        messages.error(request, _("That verification link is no longer valid."))
+        return redirect("accounts:login")
+
+    if not record.is_valid():
+        if record.is_consumed:
+            messages.info(request, _("This email address has already been confirmed."))
+        else:
+            messages.error(request, _("That verification link has expired. Request a new one below."))
+        pending_url = reverse("accounts:verify-email-pending")
+        email = record.user.email
+        if email:
+            pending_url = f"{pending_url}?email={email}"
+        return redirect(pending_url)
+
+    user = record.user
+    record.mark_consumed()
+    user.email_verified = True
+    user.is_active = True
+    user.save(update_fields=["email_verified", "is_active"])
+    user.backend = _default_auth_backend()  # type: ignore[attr-defined]
+    login(request, user)
+    messages.success(request, _("Email verified! You're all set."))
+    return redirect(user.get_dashboard_url())
+
+
+@require_POST
+def resend_verification_email(request: HttpRequest) -> HttpResponse:
+    """Allow the user to request another verification link."""
+
+    email = (request.POST.get("email") or "").strip()
+    redirect_url = reverse("accounts:verify-email-pending")
+    if email:
+        redirect_url = f"{redirect_url}?email={email}"
+
+    if not email:
+        messages.error(request, _("Enter the email address you used when signing up."))
+        return redirect(redirect_url)
+
+    user = User.objects.filter(email__iexact=email).first()
+    if user is None:
+        messages.error(request, _("We couldn't find an account with that email."))
+        return redirect(redirect_url)
+
+    if user.email_verified:
+        messages.info(request, _("This email is already verified. You can sign in now."))
+        return redirect("accounts:login")
+
+    EmailVerificationService.send_verification(user, request)
+    messages.success(request, _("A fresh verification link is on the way."))
+    return redirect(redirect_url)
 
 
 @login_required

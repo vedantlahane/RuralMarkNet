@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Verify your email" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+    <div class="rounded-3xl bg-white p-8 shadow-lg ring-1 ring-emerald-50">
+        <div class="space-y-4 text-center">
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">{% trans "One last step" %}</p>
+            <h1 class="text-3xl font-semibold text-slate-900">{% trans "Check your inbox" %}</h1>
+            <p class="text-sm text-slate-500">
+                {% if email %}
+                    {% blocktrans trimmed with email=email %}We just sent a confirmation link to {{ email }}.{% endblocktrans %}
+                {% else %}
+                    {% trans "We just sent you a confirmation link." %}
+                {% endif %}
+            </p>
+            <p class="text-sm text-slate-500">
+                {% trans "Open the link within 48 hours to activate your account. Developing locally? Copy the link straight from the Django console output." %}
+            </p>
+        </div>
+        <div class="mt-8 rounded-2xl bg-emerald-50/70 px-4 py-3 text-sm text-emerald-800">
+            <p class="font-semibold">{% trans "Didn't get the email?" %}</p>
+            <p>{% trans "Check your spam folder or request a fresh link below." %}</p>
+        </div>
+        <form method="post" action="{% url 'accounts:verify-email-resend' %}" class="mt-6 space-y-4">
+            {% csrf_token %}
+            <label for="resend-email" class="block text-sm font-semibold text-slate-700">{% trans "Email address" %}</label>
+            <input type="email" id="resend-email" name="email" value="{{ email }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-800 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="you@example.com" autocomplete="email" />
+            <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-500">{% trans "Resend verification email" %}</button>
+        </form>
+        <p class="mt-6 text-center text-xs text-slate-400">{% trans "Once verified you'll be redirected automatically to the right dashboard." %}</p>
+    </div>
+</div>
+{% endblock %}

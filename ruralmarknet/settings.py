@@ -141,6 +141,9 @@ LOGOUT_REDIRECT_URL = "products:home"
 LOGIN_URL = "accounts:login"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = getenv(
+    "DJANGO_DEFAULT_FROM_EMAIL", "RuralMarkNet <noreply@ruralmarknet.local>"
+)
 
 CACHES = {
     "default": {

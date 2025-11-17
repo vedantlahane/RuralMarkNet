@@ -6,6 +6,7 @@ RuralMarkNet is a Django-based marketplace that connects farmers with local cust
 
 - Product catalogue with rich filtering (category, price range, availability, farmer)
 - Role-aware onboarding for farmers and customers using a custom user model
+- Email verification flow with console-friendly output for local testing
 - Session-backed cart, checkout flow, delivery scheduling, and order tracking
 - Payment abstraction layer with Stripe and PayPal placeholders and webhook entrypoints
 - Delivery management dashboard for farmers and customers
@@ -96,6 +97,16 @@ python manage.py test
 ```
 
 Included tests cover models, forms, and primary views across all apps. Extend with integration tests for ordering and payment flows as business rules evolve.
+
+## Email Verification
+
+New sign-ups stay inactive until they confirm their email address. Locally, Django uses the console email backend, so verification links appear directly in your terminal after registering. To test the flow:
+
+1. Register a user via `/accounts/signup/` (console prints the verification email).
+2. Copy the verification URL from the terminal output and open it in the browser to activate the account.
+3. If you need a fresh link, visit `/accounts/verify/pending/` and submit the resend form.
+
+You can override the sender address by setting `DJANGO_DEFAULT_FROM_EMAIL` in your environment.
 
 ## Deployment Notes
 

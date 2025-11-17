@@ -1,12 +1,15 @@
 """Models for user accounts."""
 from __future__ import annotations
 
+import secrets
+from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 if TYPE_CHECKING:  # pragma: no cover - hints for type checkers only
@@ -50,6 +53,10 @@ class User(AbstractUser):
         blank=True,
         null=True,
         help_text=_("Payment method codes this farmer chooses to accept."),
+    )
+    email_verified = models.BooleanField(
+        default=False,
+        help_text=_("Indicates whether the user has confirmed their email address."),
     )
 
     @property
@@ -96,6 +103,66 @@ class User(AbstractUser):
         """Return True when the given provider code is permitted."""
 
         return method in self.get_accepted_payment_methods()
+
+
+def _generate_verification_token() -> str:
+    """Return a short-lived, URL-safe token for email verification."""
+
+    # 32 bytes of entropy produces a 43 character URL-safe string.
+    return secrets.token_urlsafe(32)
+
+
+class EmailVerificationToken(models.Model):
+    """One-time token that ensures an email address is owned by the user."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="verification_tokens",
+    )
+    token = models.CharField(max_length=64, unique=True, default=_generate_verification_token)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:  # pragma: no cover - repr helper
+        return f"Email verification for {self.user}"  # type: ignore[str-format]
+
+    @property
+    def is_consumed(self) -> bool:
+        """Return ``True`` when the token has already been used."""
+
+        return self.consumed_at is not None
+
+    def is_expired(self, at: timezone.datetime | None = None) -> bool:
+        """Return True when the token is past its expiry."""
+
+        at = at or timezone.now()
+        return at >= self.expires_at
+
+    def is_valid(self) -> bool:
+        """Return True when the token can still be redeemed."""
+
+        return not self.is_consumed and not self.is_expired()
+
+    def mark_consumed(self) -> None:
+        """Flag the token as redeemed."""
+
+        if self.is_consumed:
+            return
+        self.consumed_at = timezone.now()
+        self.save(update_fields=["consumed_at"])
+
+    @classmethod
+    def issue_for_user(cls, user: User, expires_in: timedelta | None = None) -> "EmailVerificationToken":
+        """Create a replacement token for the user."""
+
+        expires_in = expires_in or timedelta(hours=48)
+        cls.objects.filter(user=user, consumed_at__isnull=True).delete()
+        return cls.objects.create(user=user, expires_at=timezone.now() + expires_in)
 
 
 class AuditLog(models.Model):
